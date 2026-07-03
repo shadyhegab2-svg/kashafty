@@ -1,6 +1,6 @@
 // كشافتي — Service Worker
 // عايز ترفع نسخة جديدة؟ زوّد رقم CACHE_VERSION بس، ومتلمسش الباقي.
-const CACHE_VERSION = 'kashafty-v1';
+const CACHE_VERSION = 'kashafty-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
