@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>كشافتي — منصة إدارة المجموعات الكشفية</title>
+<meta name="theme-color" content="#0f2038">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0f2038;
+    --navy2:#1e3a5f;
+    --beige:#e8dcc4;
+    --beige2:#c9b998;
+    --sky:#7dd3f0;
+    --accent:#7dd3f0; /* بيتغيّر ديناميكيًا حسب لون كل مجموعة */
+    --text:#f4efe4;
+    --muted:#9fb0c3;
+    --border:rgba(232,220,196,0.18);
+    --card:rgba(255,255,255,0.04);
+    --ok:#4caf50;
+    --err:#e74c3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Cairo',sans-serif;
+    background:radial-gradient(circle at 30% 20%, var(--navy2), var(--navy) 70%);
+    color:var(--text);
+    min-height:100vh;
+    padding:20px 16px 40px;
+  }
+  .wrap{max-width:480px;margin:0 auto}
+  .logo-row{display:flex;flex-direction:column;align-items:center;gap:10px;margin:24px 0 30px}
+  .logo-row img{width:84px;height:84px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.35))}
+  .logo-row h1{font-size:1.7rem;font-weight:800;letter-spacing:0.5px}
+  .logo-row p{color:var(--muted);font-size:0.85rem;text-align:center}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:16px;
+    backdrop-filter:blur(6px);
+  }
+  .card h2{font-size:1.05rem;font-weight:700;margin-bottom:14px;color:var(--beige)}
+
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:0.78rem;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .field input, .field select{
+    width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);
+    border:1px solid var(--border);border-radius:10px;color:var(--text);
+    font-family:Cairo,sans-serif;font-size:0.88rem;outline:none;
+  }
+  .field input:focus, .field select:focus{border-color:var(--accent)}
+
+  .btn{
+    display:block;width:100%;padding:13px;border:none;border-radius:12px;
+    font-family:Cairo,sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--sky));color:#0a1830}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);margin-top:8px}
+  .btn-link{background:none;border:none;color:var(--sky);font-family:Cairo,sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:underline}
+
+  .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .swatch{
+    width:34px;height:34px;border-radius:50%;cursor:pointer;
+    border:3px solid transparent;transition:transform .15s;
+  }
+  .swatch.sel{border-color:#fff;transform:scale(1.12)}
+
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  .type-opt{
+    border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;
+    cursor:pointer;font-size:0.8rem;color:var(--muted);
+  }
+  .type-opt.sel{border-color:var(--accent);color:var(--text);background:rgba(255,255,255,0.05)}
+  .type-opt .emoji{font-size:1.3rem;display:block;margin-bottom:4px}
+
+  .msg{font-size:0.78rem;margin-top:8px;text-align:center}
+  .msg.err{color:var(--err)}
+  .msg.ok{color:var(--ok)}
+
+  .success-box{
+    background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.35);
+    border-radius:12px;padding:16px;text-align:center;margin-top:6px;
+  }
+  .success-box .code{
+    font-size:1.4rem;font-weight:800;letter-spacing:2px;color:var(--ok);
+    background:rgba(0,0,0,0.25);border-radius:8px;padding:8px;margin:10px 0;
+    direction:ltr;
+  }
+
+  #app{display:none}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .topbar .who{font-size:0.85rem;color:var(--muted)}
+  .topbar .who b{color:var(--text)}
+  .logout{background:none;border:none;color:var(--err);font-family:Cairo,sans-serif;font-size:0.78rem;cursor:pointer}
+
+  .color-preview-bar{height:6px;border-radius:6px;margin-bottom:16px;background:linear-gradient(90deg,var(--accent),var(--sky))}
+
+  footer{
+    margin-top:30px;text-align:center;font-size:0.7rem;color:var(--muted);
+    border-top:1px solid var(--border);padding-top:16px;line-height:1.9;
+  }
+  footer a{color:var(--sky);text-decoration:none}
+  .hidden{display:none !important}
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#111;border:1px solid var(--border);color:var(--text);
+    padding:10px 18px;border-radius:10px;font-size:0.8rem;z-index:999;
+    opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo-row">
+    <img src="icon-512.png" alt="كشافتي">
+    <h1>كشافتي</h1>
+    <p>منصة رقمية موحّدة لإدارة المجموعات الكشفية<br>بحرية · جوية · برية · مرشدات</p>
+  </div>
+
+  <!-- ===================== SCREEN: HOME (choose login/register) ===================== -->
+  <div id="scr-home">
+    <div class="card">
+      <h2>ابدأ من هنا</h2>
+      <button class="btn btn-primary" onclick="showScreen('login')">🔑 تسجيل الدخول لمجموعتي</button>
+      <button class="btn btn-outline" onclick="showScreen('register')">➕ سجّل مجموعتك الكشفية الآن</button>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN: REGISTER GROUP ===================== -->
+  <div id="scr-register" class="hidden">
+    <div class="card">
+      <h2>تسجيل مجموعة كشفية جديدة</h2>
+
+      <div class="field">
+        <label>اسم المجموعة</label>
+        <input id="regGroupName" placeholder="مثال: كشافة النجم الساطع">
+      </div>
+
+      <div class="field">
+        <label>نوع المجموعة</label>
+        <div class="type-grid" id="typeGrid">
+          <div class="type-opt sel" data-type="بحرية" onclick="selType(this)"><span class="emoji">⚓</span>بحرية</div>
+          <div class="type-opt" data-type="جوية" onclick="selType(this)"><span class="emoji">✈️</span>جوية</div>
+          <div class="type-opt" data-type="برية" onclick="selType(this)"><span class="emoji">🏕️</span>برية (فتيان)</div>
+          <div class="type-opt" data-type="مرشدات" onclick="selType(this)"><span class="emoji">🌸</span>مرشدات</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>لون المجموعة المميز</label>
+        <div class="swatches" id="colorSwatches"></div>
+      </div>
+
+      <div class="field">
+        <label>اسم المسؤول (قائد المجموعة)</label>
+        <input id="regOwnerName" placeholder="الاسم بالكامل">
+      </div>
+      <div class="field">
+        <label>رقم الموبايل (واتساب)</label>
+        <input id="regOwnerPhone" placeholder="01xxxxxxxxx" dir="ltr">
+      </div>
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="regOwnerEmail" type="email" placeholder="name@example.com" dir="ltr">
+      </div>
+      <div class="field">
+        <label>كلمة مرور الدخول</label>
+        <input id="regPassword" type="password" placeholder="اختر كلمة مرور قوية">
+      </div>
+
+      <button class="btn btn-primary" onclick="registerGroup()">✅ إنشاء المجموعة</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showScreen('home')">رجوع</button>
+      <div id="regMsg" class="msg"></div>
+    </div>
+
+    <div id="regSuccess" class="card hidden">
+      <div class="success-box">
+        <div>🎉 تم إنشاء مجموعتك بنجاح!</div>
+        <div>ده كود مجموعتك — احتفظ بيه، هتحتاجه لتسجيل الدخول:</div>
+        <div class="code" id="newGroupCode"></div>
+        <button class="btn btn-primary" onclick="showScreen('login')">تسجيل الدخول الآن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN: LOGIN ===================== -->
+  <div id="scr-login" class="hidden">
+    <div class="card">
+      <h2>تسجيل الدخول</h2>
+      <div class="field">
+        <label>كود المجموعة</label>
+        <input id="loginGroupCode" placeholder="مثال: alnajm-4821" dir="ltr">
+      </div>
+      <div class="field">
+        <label>اسم المستخدم (رقم الموبايل)</label>
+        <input id="loginUser" dir="ltr">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input id="loginPass" type="password">
+      </div>
+      <button class="btn btn-primary" onclick="loginGroup()">دخول</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showScreen('home')">رجوع</button>
+      <div id="loginMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== APP SHELL (after login) ===================== -->
+  <div id="app">
+    <div class="color-preview-bar"></div>
+    <div class="topbar">
+      <div class="who">أهلاً <b id="whoName"></b> 👋<br><span id="whoGroup" style="font-size:0.72rem"></span></div>
+      <button class="logout" onclick="doLogout()">خروج ⏻</button>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ إعدادات المجموعة</h2>
+      <div class="field">
+        <label>اسم المجموعة</label>
+        <input id="setGroupName">
+      </div>
+      <div class="field">
+        <label>لون المجموعة</label>
+        <div class="swatches" id="setColorSwatches"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveGroupSettings()">💾 حفظ التعديلات</button>
+      <div id="setMsg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>🚧 قريبًا</h2>
+      <p style="color:var(--muted);font-size:0.82rem;line-height:1.8">
+        باقي وحدات النظام (الأعضاء، المهام، الشات، الإعلانات، الحضور والتقييمات)
+        هيتم بناؤها في المراحل الجاية بنفس منطق العزل بتاع المجموعة اللي شغال دلوقتي.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    كشافتي © 2026 — جميع الحقوق محفوظة<br>
+    تطوير وإدارة: <b>شادي محمد حجاب</b><br>
+    📱 <a href="tel:+201006857145">+20 100 685 7145</a> &nbsp;|&nbsp;
+    ✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, updateDoc, getDoc, getDocs,
+  query, where, serverTimestamp, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ⚠️ استبدل القيم دي بإعدادات مشروع Firebase الخاص بـ "كشافتي"
+// (لازم يكون مشروع Firebase جديد منفصل عن مشروع أسد البحار)
+const fb = initializeApp({
+  apiKey: "AIzaSyAWP4Hd88SMtNZ9U01UmC3hGN9E29_tcqg",
+  authDomain: "kashafty-6d806.firebaseapp.com",
+  projectId: "kashafty-6d806",
+  storageBucket: "kashafty-6d806.firebasestorage.app",
+  messagingSenderId: "538811542609",
+  appId: "1:538811542609:web:e2c4201cdd068c74c35c70"
+});
+const db = getFirestore(fb);
+const GROUPS = collection(db, 'groups');
+
+// ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
+const PALETTE = ['#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
+let selColor = PALETTE[0];
+let setSelColor = PALETTE[0];
+let currentGroupCode = null;
+let currentAdmin = null;
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function esc(s){return (s||'').toString().replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+window.showScreen=function(name){
+  ['home','register','login'].forEach(s=>{
+    document.getElementById('scr-'+s).classList.toggle('hidden', s!==name);
+  });
+  document.getElementById('regSuccess').classList.add('hidden');
+  document.getElementById('regMsg').textContent='';
+  document.getElementById('loginMsg').textContent='';
+};
+
+window.selType=function(el){
+  document.querySelectorAll('#typeGrid .type-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+};
+
+function buildSwatches(containerId, onPick, initial){
+  const el=document.getElementById(containerId);
+  el.innerHTML = PALETTE.map(c=>`<div class="swatch${c===initial?' sel':''}" style="background:${c}" data-c="${c}" onclick="pickSwatch('${containerId}','${c}')"></div>`).join('');
+}
+window.pickSwatch=function(containerId,color){
+  document.querySelectorAll('#'+containerId+' .swatch').forEach(s=>s.classList.toggle('sel', s.dataset.c===color));
+  if(containerId==='colorSwatches') selColor=color;
+  if(containerId==='setColorSwatches'){ setSelColor=color; applyAccent(color); }
+}
+buildSwatches('colorSwatches', null, selColor);
+
+function applyAccent(color){
+  document.documentElement.style.setProperty('--accent', color);
+}
+
+function slugify(name){
+  return (name||'group')
+    .trim().toLowerCase()
+    .replace(/[^a-z0-9ء-ي\s-]/g,'')
+    .replace(/\s+/g,'-')
+    .slice(0,20) || 'group';
+}
+
+// ===== REGISTER =====
+window.registerGroup=async function(){
+  const name=document.getElementById('regGroupName').value.trim();
+  const type=document.querySelector('#typeGrid .type-opt.sel')?.dataset.type||'برية';
+  const ownerName=document.getElementById('regOwnerName').value.trim();
+  const ownerPhone=document.getElementById('regOwnerPhone').value.trim();
+  const ownerEmail=document.getElementById('regOwnerEmail').value.trim();
+  const password=document.getElementById('regPassword').value;
+  const msgEl=document.getElementById('regMsg');
+  msgEl.className='msg';msgEl.textContent='';
+
+  if(!name||!ownerName||!ownerPhone||!password){
+    msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة ⚠️';return;
+  }
+  const groupCode = slugify(name)+'-'+Math.floor(1000+Math.random()*9000);
+
+  try{
+    await setDoc(doc(db,'groups',groupCode),{
+      name, type, ownerName, ownerPhone, ownerEmail,
+      accentColor: selColor, logoUrl:'', createdAt: serverTimestamp()
+    });
+    await addDoc(collection(db,'groups',groupCode,'admins'),{
+      username: ownerPhone, password, name: ownerName, role:'super', createdAt: serverTimestamp()
+    });
+    document.getElementById('newGroupCode').textContent=groupCode;
+    document.getElementById('regSuccess').classList.remove('hidden');
+    toast('تم إنشاء المجموعة بنجاح ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+// ===== LOGIN =====
+window.loginGroup=async function(){
+  const code=document.getElementById('loginGroupCode').value.trim();
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const msgEl=document.getElementById('loginMsg');
+  msgEl.className='msg';msgEl.textContent='';
+
+  if(!code||!user||!pass){
+    msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;
+  }
+  try{
+    const groupSnap=await getDoc(doc(db,'groups',code));
+    if(!groupSnap.exists()){
+      msgEl.className='msg err';msgEl.textContent='كود المجموعة غير صحيح ❌';return;
+    }
+    const adminsSnap=await getDocs(query(collection(db,'groups',code,'admins'), where('username','==',user)));
+    let found=null;
+    adminsSnap.forEach(d=>{ if(d.data().password===pass) found={id:d.id,...d.data()}; });
+    if(!found){
+      msgEl.className='msg err';msgEl.textContent='اسم المستخدم أو كلمة المرور غلط ❌';return;
+    }
+    currentGroupCode=code;
+    currentAdmin=found;
+    enterApp(groupSnap.data());
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+function enterApp(groupData){
+  document.getElementById('scr-home').classList.add('hidden');
+  document.getElementById('scr-register').classList.add('hidden');
+  document.getElementById('scr-login').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  document.getElementById('whoName').textContent=currentAdmin.name;
+  document.getElementById('whoGroup').textContent=groupData.name+' ('+currentGroupCode+')';
+  document.getElementById('setGroupName').value=groupData.name;
+  setSelColor=groupData.accentColor||PALETTE[0];
+  applyAccent(setSelColor);
+  buildSwatches('setColorSwatches', null, setSelColor);
+}
+
+window.doLogout=function(){
+  currentGroupCode=null;currentAdmin=null;
+  document.getElementById('app').style.display='none';
+  applyAccent(PALETTE[0]);
+  showScreen('home');
+};
+
+window.saveGroupSettings=async function(){
+  if(!currentGroupCode)return;
+  const name=document.getElementById('setGroupName').value.trim();
+  const msgEl=document.getElementById('setMsg');
+  if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم المجموعة ⚠️';return;}
+  try{
+    await updateDoc(doc(db,'groups',currentGroupCode),{ name, accentColor: setSelColor });
+    document.getElementById('whoGroup').textContent=name+' ('+currentGroupCode+')';
+    msgEl.className='msg ok';msgEl.textContent='تم الحفظ ✅';
+    toast('تم حفظ إعدادات المجموعة ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+// Service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

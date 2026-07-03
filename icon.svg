@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f2038"/>
+    </radialGradient>
+    <linearGradient id="needleBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3f0"/>
+      <stop offset="100%" stop-color="#3a9bd1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- beige ring -->
+  <circle cx="256" cy="256" r="212" fill="none" stroke="#e8dcc4" stroke-width="14"/>
+  <circle cx="256" cy="256" r="186" fill="none" stroke="#e8dcc4" stroke-width="3" opacity="0.55"/>
+
+  <!-- tick marks -->
+  <g stroke="#e8dcc4" stroke-width="4" opacity="0.85">
+    <line x1="256" y1="60"  x2="256" y2="86"/>
+    <line x1="256" y1="426" x2="256" y2="452"/>
+    <line x1="60"  y1="256" x2="86"  y2="256"/>
+    <line x1="426" y1="256" x2="452" y2="256"/>
+  </g>
+  <g stroke="#e8dcc4" stroke-width="2.5" opacity="0.5">
+    <line x1="130" y1="130" x2="148" y2="148"/>
+    <line x1="382" y1="130" x2="364" y2="148"/>
+    <line x1="130" y1="382" x2="148" y2="364"/>
+    <line x1="382" y1="382" x2="364" y2="364"/>
+  </g>
+
+  <!-- compass star (8-point) -->
+  <g transform="translate(256,256)">
+    <!-- main cross points: beige -->
+    <polygon points="0,-168 26,-26 0,0 -26,-26" fill="#e8dcc4"/>
+    <polygon points="0,168 26,26 0,0 -26,26" fill="#c9b998"/>
+    <polygon points="168,0 26,26 0,0 26,-26" fill="#e8dcc4"/>
+    <polygon points="-168,0 -26,26 0,0 -26,-26" fill="#c9b998"/>
+
+    <!-- diagonal points: sky blue (the "needle" accent) -->
+    <polygon points="0,-118 16,-16 0,0 -16,-16" fill="url(#needleBlue)" transform="rotate(45)"/>
+    <polygon points="0,118 16,16 0,0 -16,16" fill="#2f7fa8" transform="rotate(45)"/>
+    <polygon points="118,0 16,16 0,0 16,-16" fill="url(#needleBlue)" transform="rotate(45)"/>
+    <polygon points="-118,0 -16,16 0,0 -16,-16" fill="#2f7fa8" transform="rotate(45)"/>
+
+    <!-- center medallion -->
+    <circle r="34" fill="#0f2038" stroke="#e8dcc4" stroke-width="4"/>
+    <circle r="10" fill="#7dd3f0"/>
+  </g>
+</svg>

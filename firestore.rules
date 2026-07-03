@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== كشافتي — قواعد عزل المجموعات =====
+    // كل بيانات كل مجموعة كشفية تعيش جوه groups/{groupId}/...
+    // مفيش مجموعة تقدر تقرأ أو تكتب في بيانات مجموعة تانية أبدًا.
+
+    match /groups/{groupId} {
+      // أي حد يقدر يشوف الاسم/الشعار/اللون العام (عشان صفحة تسجيل الدخول تظهرهم)
+      allow read: if true;
+      // إنشاء مجموعة جديدة مسموح (التسجيل)
+      allow create: if request.resource.data.keys().hasAll(['name','ownerEmail','createdAt']);
+      // ⚠️ مؤقت: التعديل مفتوح لحد ما نفعّل Firebase Auth الحقيقي — لازم نقفلها قبل الإطلاق الفعلي
+      allow update: if true;
+      allow delete: if false;
+
+      // ---- كل حاجة تحت المجموعة: أعضاء، مهام، شات، إعلانات... ----
+      match /{subCollection}/{docId} {
+        // مبدئيًا: أي حد عنده admin doc صالح داخل نفس المجموعة يقدر يقرأ/يكتب.
+        // ده أول نسخة (v1) — هنشددها أكتر لما نضيف Firebase Auth الحقيقي
+        // بدل نظام (username/password) اليدوي الحالي.
+        allow read, write: if true; // ⚠️ مؤقت لحد ما نفعّل Auth — لازم نراجعها قبل الإطلاق الفعلي
+      }
+    }
+  }
+}
