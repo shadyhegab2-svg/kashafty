@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>كشافتي — منصة إدارة المجموعات الكشفية</title>
+<meta name="theme-color" content="#0f2038">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0f2038;
+    --navy2:#1e3a5f;
+    --beige:#e8dcc4;
+    --beige2:#c9b998;
+    --sky:#7dd3f0;
+    --accent:#7dd3f0; /* بيتغيّر ديناميكيًا حسب لون كل مجموعة */
+    --text:#f4efe4;
+    --muted:#9fb0c3;
+    --border:rgba(232,220,196,0.18);
+    --card:rgba(255,255,255,0.04);
+    --ok:#4caf50;
+    --err:#e74c3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Cairo',sans-serif;
+    background:radial-gradient(circle at 30% 20%, var(--navy2), var(--navy) 70%);
+    color:var(--text);
+    min-height:100vh;
+    padding:20px 16px 40px;
+  }
+  .wrap{max-width:480px;margin:0 auto}
+  .logo-row{display:flex;flex-direction:column;align-items:center;gap:10px;margin:24px 0 30px}
+  .logo-row img{width:84px;height:84px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.35))}
+  .logo-row h1{font-size:1.7rem;font-weight:800;letter-spacing:0.5px}
+  .logo-row p{color:var(--muted);font-size:0.85rem;text-align:center}
+
+  /* Group hero logo — same visual language as Asad Albahr, tinted with the group's accent color */
+  .gh-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 24px}
+  .gh-logo-wrap{position:relative;width:110px;height:110px;margin:0 auto}
+  .gh-logo-wrap::before{content:'';position:absolute;inset:-10px;border-radius:50%;background:conic-gradient(from 0deg,var(--accent),var(--beige),var(--accent),var(--sky),var(--accent));animation:ghspin 10s linear infinite;opacity:.9}
+  .gh-logo-wrap::after{content:'';position:absolute;inset:-4px;border-radius:50%;background:var(--navy2)}
+  .gh-logo-circle{position:relative;width:110px;height:110px;border-radius:50%;overflow:hidden;z-index:2;box-shadow:0 10px 26px rgba(0,0,0,.35),0 0 0 3px var(--navy)}
+  .gh-logo-circle img{width:100%;height:100%;object-fit:cover}
+  .gh-logo-circle .gh-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--navy2);font-size:2.2rem}
+  @keyframes ghspin{to{transform:rotate(360deg)}}
+  .gh-wrap h2{font-size:1.15rem;font-weight:800;color:var(--text);text-align:center}
+  .gh-wrap p{font-size:0.74rem;color:var(--muted)}
+
+  .tab-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+  .tab-btn{flex-shrink:0;padding:9px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:Cairo,sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;white-space:nowrap}
+  .tab-btn.sel{background:var(--accent);color:#0a1830;border-color:var(--accent)}
+  .tab-panel.hidden{display:none}
+
+  .mem-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border)}
+  .mem-row:last-child{border-bottom:none}
+  .mem-avatar{width:38px;height:38px;border-radius:50%;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+  .mem-info{flex:1;min-width:0}
+  .mem-info .name{font-size:0.85rem;font-weight:700;color:var(--text)}
+  .mem-info .meta{font-size:0.7rem;color:var(--muted)}
+  .mem-actions{display:flex;gap:4px}
+  .icon-btn{background:none;border:none;cursor:pointer;font-size:0.95rem;padding:4px}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:16px;
+    backdrop-filter:blur(6px);
+  }
+  .card h2{font-size:1.05rem;font-weight:700;margin-bottom:14px;color:var(--beige)}
+
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:0.78rem;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .field input, .field select{
+    width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);
+    border:1px solid var(--border);border-radius:10px;color:var(--text);
+    font-family:Cairo,sans-serif;font-size:0.88rem;outline:none;
+  }
+  .field input:focus, .field select:focus{border-color:var(--accent)}
+
+  .btn{
+    display:block;width:100%;padding:13px;border:none;border-radius:12px;
+    font-family:Cairo,sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;
+    text-align:center;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--sky));color:#0a1830}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);margin-top:8px}
+  .btn-link{background:none;border:none;color:var(--sky);font-family:Cairo,sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:underline}
+
+  .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .swatch{
+    width:34px;height:34px;border-radius:50%;cursor:pointer;
+    border:3px solid transparent;transition:transform .15s;
+  }
+  .swatch.sel{border-color:#fff;transform:scale(1.12)}
+
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  .type-opt{
+    border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;
+    cursor:pointer;font-size:0.8rem;color:var(--muted);
+  }
+  .type-opt.sel{border-color:var(--accent);color:var(--text);background:rgba(255,255,255,0.05)}
+  .type-opt .emoji{font-size:1.3rem;display:block;margin-bottom:4px}
+  .type-opt img.type-icon{width:34px;height:34px;display:block;margin:0 auto 4px;object-fit:contain;border-radius:6px}
+  .type-slogan{text-align:center;font-size:0.82rem;font-weight:700;color:var(--accent);margin-top:8px;min-height:1.2em}
+
+  .msg{font-size:0.78rem;margin-top:8px;text-align:center}
+  .msg.err{color:var(--err)}
+  .msg.ok{color:var(--ok)}
+
+  .success-box{
+    background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.35);
+    border-radius:12px;padding:16px;text-align:center;margin-top:6px;
+  }
+  .success-box .code{
+    font-size:1.4rem;font-weight:800;letter-spacing:2px;color:var(--ok);
+    background:rgba(0,0,0,0.25);border-radius:8px;padding:8px;margin:10px 0;
+    direction:ltr;
+  }
+
+  #app{display:none}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .topbar .who{font-size:0.85rem;color:var(--muted)}
+  .topbar .who b{color:var(--text)}
+  .logout{background:none;border:none;color:var(--err);font-family:Cairo,sans-serif;font-size:0.78rem;cursor:pointer}
+
+  .color-preview-bar{height:6px;border-radius:6px;margin-bottom:16px;background:linear-gradient(90deg,var(--accent),var(--sky))}
+
+  footer{
+    margin-top:30px;text-align:center;font-size:0.7rem;color:var(--muted);
+    border-top:1px solid var(--border);padding-top:16px;line-height:1.9;
+  }
+  footer a{color:var(--sky);text-decoration:none}
+  .hidden{display:none !important}
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#111;border:1px solid var(--border);color:var(--text);
+    padding:10px 18px;border-radius:10px;font-size:0.8rem;z-index:999;
+    opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo-row">
+    <img src="icon-512.png" alt="كشافتي">
+    <h1>كشافتي</h1>
+  </div>
+
+  <!-- ===================== SCREEN: HOME (choose login/register) ===================== -->
+  <div id="scr-home">
+    <div class="card">
+      <h2>ابدأ من هنا</h2>
+      <button class="btn btn-primary" onclick="showScreen('login')">🔑 تسجيل الدخول لمجموعتي</button>
+      <button class="btn btn-outline" onclick="showScreen('register')">➕ سجّل مجموعتك الكشفية الآن</button>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN: REGISTER GROUP ===================== -->
+  <div id="scr-register" class="hidden">
+    <div class="card">
+      <h2>تسجيل مجموعة كشفية جديدة</h2>
+
+      <div class="field">
+        <label>اسم المجموعة</label>
+        <input id="regGroupName" placeholder="مثال: كشافة النجم الساطع">
+      </div>
+
+      <div class="field">
+        <label>نوع المجموعة</label>
+        <div class="type-grid" id="typeGrid">
+          <div class="type-opt sel" data-type="بحرية" onclick="selType(this)"><img class="type-icon" src="type-bahreya.png" alt="بحرية">بحرية</div>
+          <div class="type-opt" data-type="جوية" onclick="selType(this)"><img class="type-icon" src="type-gaweya.png" alt="جوية">جوية</div>
+          <div class="type-opt" data-type="فتيان" onclick="selType(this)"><img class="type-icon" src="type-fetyan.png" alt="فتيان">فتيان</div>
+          <div class="type-opt" data-type="مرشدات" onclick="selType(this)"><img class="type-icon" src="type-morshedat.png" alt="مرشدات">مرشدات</div>
+        </div>
+        <div class="type-slogan" id="typeSlogan">⚡ كن مستعد</div>
+      </div>
+
+      <div class="field">
+        <label>لون المجموعة المميز</label>
+        <div class="swatches" id="colorSwatches"></div>
+      </div>
+
+      <div class="field">
+        <label>اسم المسؤول (قائد المجموعة)</label>
+        <input id="regOwnerName" placeholder="الاسم بالكامل">
+      </div>
+      <div class="field">
+        <label>رقم الموبايل (واتساب)</label>
+        <input id="regOwnerPhone" placeholder="01xxxxxxxxx" dir="ltr">
+      </div>
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="regOwnerEmail" type="email" placeholder="name@example.com" dir="ltr">
+      </div>
+      <div class="field">
+        <label>كلمة مرور الدخول</label>
+        <input id="regPassword" type="password" placeholder="اختر كلمة مرور قوية">
+      </div>
+
+      <button class="btn btn-primary" onclick="registerGroup()">✅ إنشاء المجموعة</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showScreen('home')">رجوع</button>
+      <div id="regMsg" class="msg"></div>
+    </div>
+
+    <div id="regSuccess" class="card hidden">
+      <div class="success-box">
+        <div>🎉 تم إنشاء مجموعتك بنجاح!</div>
+        <div>ده كود مجموعتك — احتفظ بيه، هتحتاجه لتسجيل الدخول:</div>
+        <div class="code" id="newGroupCode"></div>
+        <button class="btn btn-primary" onclick="showScreen('login')">تسجيل الدخول الآن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN: LOGIN ===================== -->
+  <div id="scr-login" class="hidden">
+    <div class="card">
+      <h2>تسجيل الدخول</h2>
+      <div class="field">
+        <label>كود المجموعة</label>
+        <input id="loginGroupCode" placeholder="مثال: alnajm-4821" dir="ltr">
+      </div>
+      <div class="field">
+        <label>اسم المستخدم (رقم الموبايل)</label>
+        <input id="loginUser" dir="ltr">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input id="loginPass" type="password">
+      </div>
+      <button class="btn btn-primary" onclick="loginGroup()">دخول</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showRecovery()">نسيت كلمة المرور؟</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:8px" onclick="showScreen('home')">رجوع</button>
+      <div id="loginMsg" class="msg"></div>
+    </div>
+
+    <div class="card hidden" id="recoveryCard">
+      <h2>🔑 استرجاع كلمة المرور</h2>
+      <p style="color:var(--muted);font-size:0.76rem;margin-bottom:10px">
+        الاسترجاع متاح حاليًا لصاحب المجموعة (السوبر أدمن) فقط، عن طريق مطابقة البريد الإلكتروني المسجّل وقت التسجيل.
+        لو حسابك قائد أو عريف ونسيت كلمة المرور، اطلب من صاحب مجموعتك يغيّرها لك من تاب "القادة".
+      </p>
+      <div class="field">
+        <label>كود المجموعة</label>
+        <input id="recGroupCode" dir="ltr" placeholder="مثال: alnajm-4821">
+      </div>
+      <div class="field">
+        <label>البريد الإلكتروني المسجّل لصاحب المجموعة</label>
+        <input id="recEmail" type="email" dir="ltr">
+      </div>
+      <div class="field">
+        <label>كلمة المرور الجديدة</label>
+        <input id="recNewPass" type="password">
+      </div>
+      <button class="btn btn-primary" onclick="recoverPassword()">✅ تحديث كلمة المرور</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:10px" onclick="document.getElementById('recoveryCard').classList.add('hidden')">رجوع</button>
+      <div id="recMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== APP SHELL (after login) ===================== -->
+  <div id="app">
+    <div class="color-preview-bar"></div>
+
+    <div class="gh-wrap">
+      <div class="gh-logo-wrap">
+        <div class="gh-logo-circle" id="ghLogoCircle">
+          <div class="gh-fallback" id="ghLogoFallback">🧭</div>
+          <img id="ghLogoImg" style="display:none" alt="شعار المجموعة">
+        </div>
+      </div>
+      <h2 id="ghGroupName"></h2>
+      <p>أهلاً <b id="whoName"></b> 👋</p>
+    </div>
+
+    <div class="topbar" style="justify-content:flex-end">
+      <button class="logout" onclick="doLogout()">خروج ⏻</button>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn sel" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
+      <button class="tab-btn" data-tab="tasks" onclick="switchTab(this)">📋 المهام</button>
+      <button class="tab-btn" data-tab="leaders" onclick="switchTab(this)" id="leadersTabBtn" style="display:none">🧑‍✈️ القادة</button>
+      <button class="tab-btn" data-tab="settings" onclick="switchTab(this)">⚙️ الإعدادات</button>
+    </div>
+
+    <!-- ===== TAB: MEMBERS ===== -->
+    <div id="tab-members" class="tab-panel">
+      <div class="card">
+        <h2 id="memFormTitle">➕ إضافة عضو جديد</h2>
+        <div class="field">
+          <label>الاسم</label>
+          <input id="memName" placeholder="اسم العضو بالكامل">
+        </div>
+        <div class="field">
+          <label>رقم الموبايل</label>
+          <input id="memPhone" placeholder="01xxxxxxxxx" dir="ltr">
+        </div>
+        <div class="field">
+          <label>رقم الواتساب (لو مختلف عن الموبايل)</label>
+          <input id="memWhatsapp" placeholder="اختياري" dir="ltr">
+        </div>
+        <div class="field">
+          <label>النوع</label>
+          <div class="type-grid" id="memGenderGrid">
+            <div class="type-opt sel" data-gender="male" onclick="selGender(this)"><span class="emoji">👦</span>ذكر</div>
+            <div class="type-opt" data-gender="female" onclick="selGender(this)"><span class="emoji">👧</span>أنثى</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>الطليعة / الفرقة (اختياري)</label>
+          <input id="memPatrol" placeholder="مثال: طليعة الصقور">
+        </div>
+        <button class="btn btn-primary" onclick="addOrUpdateMember()" id="memSaveBtn">✅ إضافة العضو</button>
+        <button class="btn btn-outline" onclick="resetMemberForm()" id="memCancelBtn" style="display:none">إلغاء التعديل</button>
+        <div id="memMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 قائمة الأعضاء (<span id="memCount">0</span>)</h2>
+        <input id="memSearch" placeholder="🔍 ابحث بالاسم..." oninput="renderMembersList()" style="width:100%;padding:9px;background:rgba(0,0,0,0.2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.8rem;outline:none;margin-bottom:10px">
+        <div id="memList"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: TASKS ===== -->
+    <div id="tab-tasks" class="tab-panel hidden">
+      <div class="card">
+        <h2>➕ إضافة مهمة جديدة</h2>
+        <div class="field">
+          <label>عنوان المهمة</label>
+          <input id="taskTitle" placeholder="مثال: تحضير مخيم نهاية الأسبوع">
+        </div>
+        <div class="field">
+          <label>التفاصيل (اختياري)</label>
+          <input id="taskDesc" placeholder="تفاصيل إضافية">
+        </div>
+        <div class="field">
+          <label>تاريخ الاستحقاق (اختياري)</label>
+          <input id="taskDue" type="date">
+        </div>
+        <div class="field">
+          <label>المسؤول (اختياري)</label>
+          <input id="taskOwner" placeholder="اسم المسؤول عن التنفيذ">
+        </div>
+        <button class="btn btn-primary" onclick="addTask()">✅ إضافة المهمة</button>
+        <div id="taskMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 قائمة المهام (<span id="taskCount">0</span>)</h2>
+        <div id="taskList"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: LEADERS (super admin only) ===== -->
+    <div id="tab-leaders" class="tab-panel hidden">
+      <div class="card">
+        <h2 id="ldrFormTitle">➕ إضافة قائد / عريف</h2>
+        <div class="field">
+          <label>الاسم</label>
+          <input id="ldrName" placeholder="اسم القائد/العريف">
+        </div>
+        <div class="field">
+          <label>رقم الموبايل (اسم الدخول)</label>
+          <input id="ldrUsername" placeholder="01xxxxxxxxx" dir="ltr">
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input id="ldrPassword" type="password" placeholder="كلمة مرور الدخول">
+        </div>
+        <div class="field">
+          <label>الصلاحية</label>
+          <div class="type-grid" id="ldrRoleGrid">
+            <div class="type-opt sel" data-role="leader" onclick="selLdrRole(this)"><span class="emoji">🧑‍✈️</span>قائد</div>
+            <div class="type-opt" data-role="patrol" onclick="selLdrRole(this)"><span class="emoji">🎖️</span>عريف (طليعة)</div>
+          </div>
+        </div>
+        <div class="field" id="ldrPatrolField" style="display:none">
+          <label>اسم الطليعة اللي هيديرها</label>
+          <input id="ldrPatrol" placeholder="مثال: طليعة الصقور">
+        </div>
+        <button class="btn btn-primary" onclick="addOrUpdateLeader()" id="ldrSaveBtn">✅ إضافة</button>
+        <button class="btn btn-outline" onclick="resetLeaderForm()" id="ldrCancelBtn" style="display:none">إلغاء التعديل</button>
+        <div id="ldrMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 القادة والعرفاء (<span id="ldrCount">0</span>)</h2>
+        <div id="ldrList"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: SETTINGS ===== -->
+    <div id="tab-settings" class="tab-panel hidden">
+    <div class="card">
+      <h2>⚙️ إعدادات المجموعة</h2>
+      <div class="field">
+        <label>شعار المجموعة (اختياري)</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <img id="logoPreview" style="width:60px;height:60px;border-radius:14px;object-fit:cover;background:rgba(0,0,0,0.25);display:none" alt="شعار المجموعة">
+          <label style="flex:1;padding:11px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.78rem;color:var(--muted)">
+            📎 اختار صورة
+            <input type="file" id="logoInput" accept="image/*" onchange="handleLogoPick(this)" style="display:none">
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>اسم المجموعة</label>
+        <input id="setGroupName">
+      </div>
+      <div class="field">
+        <label>لون المجموعة</label>
+        <div class="swatches" id="setColorSwatches"></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveGroupSettings()">💾 حفظ التعديلات</button>
+      <div id="setMsg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>🔑 كود المجموعة</h2>
+      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px">شارك الكود ده مع قادة وعرفاء مجموعتك عشان يقدروا يسجّلوا دخول</p>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;background:rgba(0,0,0,0.25);border:1px solid var(--border2);border-radius:10px;padding:11px;font-weight:800;letter-spacing:1px;direction:ltr;text-align:center;color:var(--sky)" id="settingsGroupCode"></div>
+        <button class="btn-link" onclick="copyGroupCode()">📋 نسخ</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔒 تغيير كلمة المرور</h2>
+      <div class="field">
+        <label>كلمة المرور الجديدة</label>
+        <input id="newPass1" type="password" placeholder="كلمة مرور جديدة">
+      </div>
+      <div class="field">
+        <label>تأكيد كلمة المرور</label>
+        <input id="newPass2" type="password" placeholder="اكتبها تاني للتأكيد">
+      </div>
+      <button class="btn btn-primary" onclick="changeMyPassword()">🔒 تحديث كلمة المرور</button>
+      <div id="passMsg" class="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>🚧 قريبًا</h2>
+      <p style="color:var(--muted);font-size:0.82rem;line-height:1.8">
+        باقي وحدات النظام (المهام، الشات، الإعلانات، الحضور والتقييمات)
+        هيتم بناؤها في المراحل الجاية بنفس منطق العزل بتاع المجموعة اللي شغال دلوقتي.
+      </p>
+    </div>
+    </div>
+  </div>
+
+  <footer>
+    كشافتي © 2026 — جميع الحقوق محفوظة<br>
+    تطوير وإدارة: <b>شادي محمد حجاب</b><br>
+    📱 <a href="tel:+201006857145">+20 100 685 7145</a> &nbsp;|&nbsp;
+    ✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, updateDoc, getDoc, getDocs,
+  query, where, serverTimestamp, setDoc, onSnapshot, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ⚠️ استبدل القيم دي بإعدادات مشروع Firebase الخاص بـ "كشافتي"
+// (لازم يكون مشروع Firebase جديد منفصل عن مشروع أسد البحار)
+const fb = initializeApp({
+  apiKey: "AIzaSyAWP4Hd88SMtNZ9U01UmC3hGN9E29_tcqg",
+  authDomain: "kashafty-6d806.firebaseapp.com",
+  projectId: "kashafty-6d806",
+  storageBucket: "kashafty-6d806.firebasestorage.app",
+  messagingSenderId: "538811542609",
+  appId: "1:538811542609:web:e2c4201cdd068c74c35c70"
+});
+const db = getFirestore(fb);
+const GROUPS = collection(db, 'groups');
+
+// ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
+const PALETTE = ['#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
+let selColor = PALETTE[0];
+let setSelColor = PALETTE[0];
+let currentGroupCode = null;
+let currentAdmin = null;
+let pendingLogoDataUrl = null; // null = no change; '' = removed; string = new logo
+
+function resizeImageToDataUrl(file, maxSize){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    reader.onerror = reject;
+    img.onload = () => {
+      let {width,height} = img;
+      if(width>height){ if(width>maxSize){height=Math.round(height*maxSize/width);width=maxSize;} }
+      else { if(height>maxSize){width=Math.round(width*maxSize/height);height=maxSize;} }
+      const canvas=document.createElement('canvas');
+      canvas.width=width;canvas.height=height;
+      canvas.getContext('2d').drawImage(img,0,0,width,height);
+      resolve(canvas.toDataURL('image/jpeg',0.82));
+    };
+    img.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+window.handleLogoPick=async function(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  try{
+    const dataUrl=await resizeImageToDataUrl(file,256);
+    pendingLogoDataUrl=dataUrl;
+    const prev=document.getElementById('logoPreview');
+    prev.src=dataUrl;prev.style.display='block';
+  }catch(e){
+    toast('تعذّر معالجة الصورة ⚠️');
+  }
+};
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function esc(s){return (s||'').toString().replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+window.showScreen=function(name){
+  ['home','register','login'].forEach(s=>{
+    document.getElementById('scr-'+s).classList.toggle('hidden', s!==name);
+  });
+  document.getElementById('regSuccess').classList.add('hidden');
+  document.getElementById('regMsg').textContent='';
+  document.getElementById('loginMsg').textContent='';
+  document.getElementById('recoveryCard').classList.add('hidden');
+};
+
+window.showRecovery=function(){
+  document.getElementById('recoveryCard').classList.remove('hidden');
+  document.getElementById('recGroupCode').value=document.getElementById('loginGroupCode').value;
+};
+
+window.recoverPassword=async function(){
+  const code=document.getElementById('recGroupCode').value.trim();
+  const email=document.getElementById('recEmail').value.trim().toLowerCase();
+  const newPass=document.getElementById('recNewPass').value;
+  const msgEl=document.getElementById('recMsg');
+  msgEl.className='msg';msgEl.textContent='';
+  if(!code||!email||!newPass){msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;}
+  try{
+    const groupSnap=await getDoc(doc(db,'groups',code));
+    if(!groupSnap.exists()){msgEl.className='msg err';msgEl.textContent='كود المجموعة غير صحيح ❌';return;}
+    const groupData=groupSnap.data();
+    if((groupData.ownerEmail||'').trim().toLowerCase()!==email){
+      msgEl.className='msg err';msgEl.textContent='البريد الإلكتروني غير مطابق ❌';return;
+    }
+    const adminsSnap=await getDocs(query(collection(db,'groups',code,'admins'), where('role','==','super')));
+    if(adminsSnap.empty){msgEl.className='msg err';msgEl.textContent='تعذّر إيجاد حساب المالك ❌';return;}
+    const superDoc=adminsSnap.docs[0];
+    await updateDoc(doc(db,'groups',code,'admins',superDoc.id),{password:newPass});
+    msgEl.className='msg ok';msgEl.textContent='تم تحديث كلمة المرور ✅ سجّل دخول بيها دلوقتي';
+    toast('تم تحديث كلمة المرور ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.copyGroupCode=function(){
+  if(!currentGroupCode)return;
+  navigator.clipboard.writeText(currentGroupCode).then(()=>toast('تم نسخ الكود ✅')).catch(()=>{});
+};
+
+window.changeMyPassword=async function(){
+  if(!currentGroupCode||!currentAdmin)return;
+  const p1=document.getElementById('newPass1').value;
+  const p2=document.getElementById('newPass2').value;
+  const msgEl=document.getElementById('passMsg');
+  if(!p1||p1.length<4){msgEl.className='msg err';msgEl.textContent='كلمة المرور لازم تكون 4 حروف/أرقام على الأقل ⚠️';return;}
+  if(p1!==p2){msgEl.className='msg err';msgEl.textContent='كلمتا المرور غير متطابقتين ❌';return;}
+  try{
+    await updateDoc(doc(db,'groups',currentGroupCode,'admins',currentAdmin.id),{password:p1});
+    document.getElementById('newPass1').value='';
+    document.getElementById('newPass2').value='';
+    msgEl.className='msg ok';msgEl.textContent='تم تحديث كلمة المرور ✅';
+    toast('تم تحديث كلمة المرور ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.selType=function(el){
+  document.querySelectorAll('#typeGrid .type-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  const slogan=document.getElementById('typeSlogan');
+  if(slogan) slogan.textContent = el.dataset.type==='مرشدات' ? '🌸 كوني مستعدة' : '⚡ كن مستعد';
+};
+
+function buildSwatches(containerId, onPick, initial){
+  const el=document.getElementById(containerId);
+  el.innerHTML = PALETTE.map(c=>`<div class="swatch${c===initial?' sel':''}" style="background:${c}" data-c="${c}" onclick="pickSwatch('${containerId}','${c}')"></div>`).join('');
+}
+window.pickSwatch=function(containerId,color){
+  document.querySelectorAll('#'+containerId+' .swatch').forEach(s=>s.classList.toggle('sel', s.dataset.c===color));
+  if(containerId==='colorSwatches') selColor=color;
+  if(containerId==='setColorSwatches'){ setSelColor=color; applyAccent(color); }
+}
+buildSwatches('colorSwatches', null, selColor);
+
+function applyAccent(color){
+  document.documentElement.style.setProperty('--accent', color);
+}
+
+function slugify(name){
+  return (name||'group')
+    .trim().toLowerCase()
+    .replace(/[^a-z0-9ء-ي\s-]/g,'')
+    .replace(/\s+/g,'-')
+    .slice(0,20) || 'group';
+}
+
+// ===== REGISTER =====
+window.registerGroup=async function(){
+  const name=document.getElementById('regGroupName').value.trim();
+  const type=document.querySelector('#typeGrid .type-opt.sel')?.dataset.type||'فتيان';
+  const ownerName=document.getElementById('regOwnerName').value.trim();
+  const ownerPhone=document.getElementById('regOwnerPhone').value.trim();
+  const ownerEmail=document.getElementById('regOwnerEmail').value.trim();
+  const password=document.getElementById('regPassword').value;
+  const msgEl=document.getElementById('regMsg');
+  msgEl.className='msg';msgEl.textContent='';
+
+  if(!name||!ownerName||!ownerPhone||!password){
+    msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة ⚠️';return;
+  }
+  const groupCode = slugify(name)+'-'+Math.floor(1000+Math.random()*9000);
+
+  try{
+    await setDoc(doc(db,'groups',groupCode),{
+      name, type, ownerName, ownerPhone, ownerEmail,
+      accentColor: selColor, logoUrl:'', createdAt: serverTimestamp()
+    });
+    await addDoc(collection(db,'groups',groupCode,'admins'),{
+      username: ownerPhone, password, name: ownerName, role:'super', createdAt: serverTimestamp()
+    });
+    document.getElementById('newGroupCode').textContent=groupCode;
+    document.getElementById('regSuccess').classList.remove('hidden');
+    toast('تم إنشاء المجموعة بنجاح ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+// ===== LOGIN =====
+window.loginGroup=async function(){
+  const code=document.getElementById('loginGroupCode').value.trim();
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const msgEl=document.getElementById('loginMsg');
+  msgEl.className='msg';msgEl.textContent='';
+
+  if(!code||!user||!pass){
+    msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;
+  }
+  try{
+    const groupSnap=await getDoc(doc(db,'groups',code));
+    if(!groupSnap.exists()){
+      msgEl.className='msg err';msgEl.textContent='كود المجموعة غير صحيح ❌';return;
+    }
+    const adminsSnap=await getDocs(query(collection(db,'groups',code,'admins'), where('username','==',user)));
+    let found=null;
+    adminsSnap.forEach(d=>{ if(d.data().password===pass) found={id:d.id,...d.data()}; });
+    if(!found){
+      msgEl.className='msg err';msgEl.textContent='اسم المستخدم أو كلمة المرور غلط ❌';return;
+    }
+    currentGroupCode=code;
+    currentAdmin=found;
+    enterApp(groupSnap.data());
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+function enterApp(groupData){
+  document.getElementById('scr-home').classList.add('hidden');
+  document.getElementById('scr-register').classList.add('hidden');
+  document.getElementById('scr-login').classList.add('hidden');
+  document.getElementById('app').style.display='block';
+  document.getElementById('whoName').textContent=currentAdmin.name;
+  document.getElementById('ghGroupName').textContent=groupData.name;
+  document.getElementById('setGroupName').value=groupData.name;
+  document.getElementById('settingsGroupCode').textContent=currentGroupCode;
+  setSelColor=groupData.accentColor||PALETTE[0];
+  applyAccent(setSelColor);
+  buildSwatches('setColorSwatches', null, setSelColor);
+  pendingLogoDataUrl=null;
+  const heroImg=document.getElementById('ghLogoImg');
+  const heroFallback=document.getElementById('ghLogoFallback');
+  const prevLogo=document.getElementById('logoPreview');
+  if(groupData.logoUrl){
+    heroImg.src=groupData.logoUrl; heroImg.style.display='block'; heroFallback.style.display='none';
+    prevLogo.src=groupData.logoUrl; prevLogo.style.display='block';
+  }else{
+    heroImg.style.display='none'; heroFallback.style.display='flex';
+    prevLogo.style.display='none';
+  }
+  startMembersSubscription();
+  startTasksSubscription();
+  const ldrTabBtn=document.getElementById('leadersTabBtn');
+  if(currentAdmin.role==='super'){
+    ldrTabBtn.style.display='inline-block';
+    startLeadersSubscription();
+  }else{
+    ldrTabBtn.style.display='none';
+  }
+}
+
+window.switchTab=function(btn){
+  const tab=btn.dataset.tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('sel', b===btn));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('hidden', p.id!=='tab-'+tab));
+};
+
+window.doLogout=function(){
+  currentGroupCode=null;currentAdmin=null;
+  if(membersUnsub){membersUnsub();membersUnsub=null;}
+  if(leadersUnsub){leadersUnsub();leadersUnsub=null;}
+  if(tasksUnsub){tasksUnsub();tasksUnsub=null;}
+  members=[];leaders=[];tasks=[];
+  document.getElementById('app').style.display='none';
+  applyAccent(PALETTE[0]);
+  showScreen('home');
+};
+
+// ===== MEMBERS MODULE =====
+let members=[];
+let membersUnsub=null;
+let editingMemberId=null;
+let memGender='male';
+
+function startMembersSubscription(){
+  if(membersUnsub){membersUnsub();membersUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'members');
+  membersUnsub=onSnapshot(col, snap=>{
+    members=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMembersList();
+  });
+}
+
+window.selGender=function(el){
+  document.querySelectorAll('#memGenderGrid .type-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  memGender=el.dataset.gender;
+};
+
+function renderMembersList(){
+  const el=document.getElementById('memList');
+  const countEl=document.getElementById('memCount');
+  if(!el)return;
+  const searchEl=document.getElementById('memSearch');
+  const q=(searchEl?searchEl.value:'').trim().toLowerCase();
+  const filtered=members.filter(m=>!q || (m.name||'').toLowerCase().includes(q));
+  countEl.textContent=members.length;
+  if(!filtered.length){
+    el.innerHTML='<div class="empty" style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد أعضاء بعد</div>';
+    return;
+  }
+  el.innerHTML=filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar')).map(m=>{
+    const icon=m.gender==='female'?'👧':'👦';
+    const patrol=m.patrol?` · طليعة ${esc(m.patrol)}`:'';
+    return `<div class="mem-row">
+      <div class="mem-avatar">${icon}</div>
+      <div class="mem-info">
+        <div class="name">${esc(m.name)}</div>
+        <div class="meta">${esc(m.phone||'بدون رقم')}${patrol}</div>
+      </div>
+      <div class="mem-actions">
+        <button class="icon-btn" onclick="editMember('${m.id}')" title="تعديل">✏️</button>
+        <button class="icon-btn" onclick="deleteMember('${m.id}')" title="حذف">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addOrUpdateMember=async function(){
+  if(!currentGroupCode)return;
+  const name=document.getElementById('memName').value.trim();
+  const phone=document.getElementById('memPhone').value.trim();
+  const whatsapp=document.getElementById('memWhatsapp').value.trim();
+  const patrol=document.getElementById('memPatrol').value.trim();
+  const msgEl=document.getElementById('memMsg');
+  if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم العضو ⚠️';return;}
+  const data={ name, phone, whatsapp: whatsapp||phone, gender: memGender, patrol };
+  try{
+    if(editingMemberId){
+      await updateDoc(doc(db,'groups',currentGroupCode,'members',editingMemberId), data);
+      msgEl.className='msg ok';msgEl.textContent='تم تعديل بيانات العضو ✅';
+    }else{
+      data.createdAt=serverTimestamp();
+      await addDoc(collection(db,'groups',currentGroupCode,'members'), data);
+      msgEl.className='msg ok';msgEl.textContent='تمت إضافة العضو ✅';
+    }
+    toast('تم الحفظ ✅');
+    resetMemberForm();
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.editMember=function(id){
+  const m=members.find(x=>x.id===id);
+  if(!m)return;
+  editingMemberId=id;
+  document.getElementById('memName').value=m.name||'';
+  document.getElementById('memPhone').value=m.phone||'';
+  document.getElementById('memWhatsapp').value=m.whatsapp||'';
+  document.getElementById('memPatrol').value=m.patrol||'';
+  memGender=m.gender||'male';
+  document.querySelectorAll('#memGenderGrid .type-opt').forEach(o=>o.classList.toggle('sel', o.dataset.gender===memGender));
+  document.getElementById('memFormTitle').textContent='✏️ تعديل بيانات العضو';
+  document.getElementById('memSaveBtn').textContent='💾 حفظ التعديل';
+  document.getElementById('memCancelBtn').style.display='block';
+  document.getElementById('tab-members').scrollIntoView({behavior:'smooth'});
+};
+
+window.resetMemberForm=function(){
+  editingMemberId=null;
+  document.getElementById('memName').value='';
+  document.getElementById('memPhone').value='';
+  document.getElementById('memWhatsapp').value='';
+  document.getElementById('memPatrol').value='';
+  memGender='male';
+  document.querySelectorAll('#memGenderGrid .type-opt').forEach((o,i)=>o.classList.toggle('sel', i===0));
+  document.getElementById('memFormTitle').textContent='➕ إضافة عضو جديد';
+  document.getElementById('memSaveBtn').textContent='✅ إضافة العضو';
+  document.getElementById('memCancelBtn').style.display='none';
+  document.getElementById('memMsg').textContent='';
+};
+
+window.deleteMember=async function(id){
+  if(!confirm('حذف هذا العضو؟'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'members',id));
+    toast('تم الحذف ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+// ===== END MEMBERS MODULE =====
+
+// ===== LEADERS MODULE (super admin only) =====
+let leaders=[];
+let leadersUnsub=null;
+let editingLeaderId=null;
+let ldrRole='leader';
+
+function startLeadersSubscription(){
+  if(leadersUnsub){leadersUnsub();leadersUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'admins');
+  leadersUnsub=onSnapshot(col, snap=>{
+    leaders=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderLeadersList();
+  });
+}
+
+window.selLdrRole=function(el){
+  document.querySelectorAll('#ldrRoleGrid .type-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  ldrRole=el.dataset.role;
+  document.getElementById('ldrPatrolField').style.display = ldrRole==='patrol' ? 'block' : 'none';
+};
+
+function renderLeadersList(){
+  const el=document.getElementById('ldrList');
+  const countEl=document.getElementById('ldrCount');
+  if(!el)return;
+  const visible=leaders.filter(l=>l.role!=='super');
+  countEl.textContent=visible.length;
+  if(!visible.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد قادة أو عرفاء بعد</div>';
+    return;
+  }
+  el.innerHTML=visible.map(l=>{
+    const roleLabel = l.role==='leader' ? '🧑‍✈️ قائد' : `🎖️ عريف${l.patrol?` · طليعة ${esc(l.patrol)}`:''}`;
+    const isMe = currentAdmin && l.id===currentAdmin.id;
+    return `<div class="mem-row">
+      <div class="mem-avatar">${l.role==='leader'?'🧑‍✈️':'🎖️'}</div>
+      <div class="mem-info">
+        <div class="name">${esc(l.name)}${isMe?' (أنت)':''}</div>
+        <div class="meta">${esc(l.username)} · ${roleLabel}</div>
+      </div>
+      <div class="mem-actions">
+        <button class="icon-btn" onclick="editLeader('${l.id}')" title="تعديل">✏️</button>
+        ${isMe?'':`<button class="icon-btn" onclick="deleteLeader('${l.id}')" title="حذف">🗑️</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addOrUpdateLeader=async function(){
+  if(!currentGroupCode)return;
+  const name=document.getElementById('ldrName').value.trim();
+  const username=document.getElementById('ldrUsername').value.trim();
+  const password=document.getElementById('ldrPassword').value;
+  const patrol=document.getElementById('ldrPatrol').value.trim();
+  const msgEl=document.getElementById('ldrMsg');
+  if(!name||!username){msgEl.className='msg err';msgEl.textContent='اكتب الاسم واسم الدخول ⚠️';return;}
+  if(!editingLeaderId && !password){msgEl.className='msg err';msgEl.textContent='اكتب كلمة مرور ⚠️';return;}
+  const data={ name, username, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
+  if(password) data.password=password;
+  try{
+    if(editingLeaderId){
+      await updateDoc(doc(db,'groups',currentGroupCode,'admins',editingLeaderId), data);
+      msgEl.className='msg ok';msgEl.textContent='تم تعديل البيانات ✅';
+    }else{
+      data.createdAt=serverTimestamp();
+      await addDoc(collection(db,'groups',currentGroupCode,'admins'), data);
+      msgEl.className='msg ok';msgEl.textContent='تمت الإضافة ✅';
+    }
+    toast('تم الحفظ ✅');
+    resetLeaderForm();
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.editLeader=function(id){
+  const l=leaders.find(x=>x.id===id);
+  if(!l)return;
+  editingLeaderId=id;
+  document.getElementById('ldrName').value=l.name||'';
+  document.getElementById('ldrUsername').value=l.username||'';
+  document.getElementById('ldrPassword').value='';
+  document.getElementById('ldrPatrol').value=l.patrol||'';
+  ldrRole=l.role==='patrol'?'patrol':'leader';
+  document.querySelectorAll('#ldrRoleGrid .type-opt').forEach(o=>o.classList.toggle('sel', o.dataset.role===ldrRole));
+  document.getElementById('ldrPatrolField').style.display = ldrRole==='patrol' ? 'block' : 'none';
+  document.getElementById('ldrFormTitle').textContent='✏️ تعديل بيانات';
+  document.getElementById('ldrSaveBtn').textContent='💾 حفظ التعديل';
+  document.getElementById('ldrCancelBtn').style.display='block';
+  document.getElementById('tab-leaders').scrollIntoView({behavior:'smooth'});
+};
+
+window.resetLeaderForm=function(){
+  editingLeaderId=null;
+  document.getElementById('ldrName').value='';
+  document.getElementById('ldrUsername').value='';
+  document.getElementById('ldrPassword').value='';
+  document.getElementById('ldrPatrol').value='';
+  ldrRole='leader';
+  document.querySelectorAll('#ldrRoleGrid .type-opt').forEach((o,i)=>o.classList.toggle('sel', i===0));
+  document.getElementById('ldrPatrolField').style.display='none';
+  document.getElementById('ldrFormTitle').textContent='➕ إضافة قائد / عريف';
+  document.getElementById('ldrSaveBtn').textContent='✅ إضافة';
+  document.getElementById('ldrCancelBtn').style.display='none';
+  document.getElementById('ldrMsg').textContent='';
+};
+
+window.deleteLeader=async function(id){
+  if(currentAdmin && id===currentAdmin.id){toast('متقدرش تحذف حسابك بنفسك ⚠️');return;}
+  if(!confirm('حذف هذا الحساب؟'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'admins',id));
+    toast('تم الحذف ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+// ===== END LEADERS MODULE =====
+
+// ===== TASKS MODULE =====
+let tasks=[];
+let tasksUnsub=null;
+const STATUS_LABELS={pending:'⏳ لم تبدأ',doing:'🔄 جارية',done:'✅ منتهية'};
+const STATUS_NEXT={pending:'doing',doing:'done',done:'pending'};
+
+function startTasksSubscription(){
+  if(tasksUnsub){tasksUnsub();tasksUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'tasks');
+  tasksUnsub=onSnapshot(col, snap=>{
+    tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderTasksList();
+  });
+}
+
+function renderTasksList(){
+  const el=document.getElementById('taskList');
+  const countEl=document.getElementById('taskCount');
+  if(!el)return;
+  countEl.textContent=tasks.length;
+  const isPatrol=currentAdmin&&currentAdmin.role==='patrol';
+  if(!tasks.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد مهام بعد</div>';
+    return;
+  }
+  const sorted=[...tasks].sort((a,b)=>(a.createdAt?.seconds||0)<(b.createdAt?.seconds||0)?1:-1);
+  el.innerHTML=sorted.map(t=>{
+    const due=t.due?`📅 ${t.due}`:'';
+    const owner=t.owner?`👤 ${esc(t.owner)}`:'';
+    const status=STATUS_LABELS[t.status||'pending'];
+    const next=STATUS_NEXT[t.status||'pending'];
+    const isMine=isPatrol&&currentAdmin&&t.creatorId===currentAdmin.id;
+    const canManage=!isPatrol||isMine;
+    const patrolTag=t.patrol?` <span style="font-size:0.68rem;color:var(--sky)">· طليعة ${esc(t.patrol)}</span>`:'';
+    return `<div style="padding:12px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:10px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="font-weight:700;color:var(--text);font-size:0.85rem">${esc(t.title)}${patrolTag}</div>
+        ${canManage?`<button onclick="updTaskStatus('${t.id}','${next}')" style="font-size:0.7rem;padding:4px 8px;border:1px solid var(--border2);border-radius:8px;background:rgba(0,0,0,0.2);color:var(--text);cursor:pointer;white-space:nowrap;font-family:Cairo,sans-serif">${status}</button>`:`<span style="font-size:0.7rem;padding:4px 8px;border:1px solid var(--border2);border-radius:8px;color:var(--muted)">${status}</span>`}
+      </div>
+      ${t.desc?`<div style="color:var(--muted);font-size:0.74rem;margin-top:4px">${esc(t.desc)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div style="font-size:0.68rem;color:var(--muted)">${due} ${owner}</div>
+        ${canManage?`<button onclick="delTask('${t.id}')" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:0.75rem">🗑️ حذف</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addTask=async function(){
+  if(!currentGroupCode)return;
+  const title=document.getElementById('taskTitle').value.trim();
+  const msgEl=document.getElementById('taskMsg');
+  if(!title){msgEl.className='msg err';msgEl.textContent='اكتب عنوان المهمة ⚠️';return;}
+  const desc=document.getElementById('taskDesc').value.trim();
+  const due=document.getElementById('taskDue').value;
+  const owner=document.getElementById('taskOwner').value.trim();
+  const isPatrol=currentAdmin&&currentAdmin.role==='patrol';
+  try{
+    await addDoc(collection(db,'groups',currentGroupCode,'tasks'),{
+      title, desc, due, owner, status:'pending', createdAt:serverTimestamp(),
+      patrol: isPatrol ? (currentAdmin.patrol||null) : null,
+      creatorId: currentAdmin.id,
+      creatorName: currentAdmin.name
+    });
+    document.getElementById('taskTitle').value='';
+    document.getElementById('taskDesc').value='';
+    document.getElementById('taskDue').value='';
+    document.getElementById('taskOwner').value='';
+    msgEl.className='msg ok';msgEl.textContent='تمت إضافة المهمة ✅';
+    toast('تمت إضافة المهمة ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.updTaskStatus=async function(id,status){
+  const isPatrol=currentAdmin&&currentAdmin.role==='patrol';
+  if(isPatrol){
+    const t=tasks.find(x=>x.id===id);
+    if(!t||t.creatorId!==currentAdmin.id){toast('تقدر تعدّل مهامك بس ⚠️');return;}
+  }
+  try{
+    await updateDoc(doc(db,'groups',currentGroupCode,'tasks',id),{status});
+  }catch(e){toast('حصل خطأ: '+e.message);}
+};
+
+window.delTask=async function(id){
+  const isPatrol=currentAdmin&&currentAdmin.role==='patrol';
+  if(isPatrol){
+    const t=tasks.find(x=>x.id===id);
+    if(!t||t.creatorId!==currentAdmin.id){toast('تقدر تحذف مهامك بس ⚠️');return;}
+  }
+  if(!confirm('حذف هذه المهمة؟'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'tasks',id));
+    toast('تم الحذف ✅');
+  }catch(e){toast('حصل خطأ: '+e.message);}
+};
+// ===== END TASKS MODULE =====
+
+window.saveGroupSettings=async function(){
+  if(!currentGroupCode)return;
+  const name=document.getElementById('setGroupName').value.trim();
+  const msgEl=document.getElementById('setMsg');
+  if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم المجموعة ⚠️';return;}
+  try{
+    const updateData={ name, accentColor: setSelColor };
+    if(pendingLogoDataUrl!==null) updateData.logoUrl = pendingLogoDataUrl;
+    await updateDoc(doc(db,'groups',currentGroupCode), updateData);
+    document.getElementById('ghGroupName').textContent=name;
+    if(pendingLogoDataUrl){
+      const heroImg=document.getElementById('ghLogoImg');
+      const heroFallback=document.getElementById('ghLogoFallback');
+      heroImg.src=pendingLogoDataUrl; heroImg.style.display='block'; heroFallback.style.display='none';
+    }
+    pendingLogoDataUrl=null;
+    msgEl.className='msg ok';msgEl.textContent='تم الحفظ ✅';
+    toast('تم حفظ إعدادات المجموعة ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+// Service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
