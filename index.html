@@ -288,7 +288,7 @@
         <input id="regOwnerPhone" placeholder="01xxxxxxxxx" dir="ltr">
       </div>
       <div class="field">
-        <label>البريد الإلكتروني</label>
+        <label>البريد الإلكتروني (إلزامي — هيُستخدم لتسجيل الدخول واسترجاع كلمة المرور)</label>
         <input id="regOwnerEmail" type="email" placeholder="name@example.com" dir="ltr">
       </div>
       <div class="field">
@@ -316,12 +316,8 @@
     <div class="card">
       <h2>تسجيل الدخول</h2>
       <div class="field">
-        <label>كود المجموعة</label>
-        <input id="loginGroupCode" placeholder="مثال: alnajm-4821" dir="ltr">
-      </div>
-      <div class="field">
-        <label>اسم المستخدم (رقم الموبايل)</label>
-        <input id="loginUser" dir="ltr">
+        <label>البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" dir="ltr">
       </div>
       <div class="field">
         <label>كلمة المرور</label>
@@ -336,22 +332,13 @@
     <div class="card hidden" id="recoveryCard">
       <h2>🔑 استرجاع كلمة المرور</h2>
       <p style="color:var(--muted);font-size:0.76rem;margin-bottom:10px">
-        الاسترجاع متاح حاليًا لصاحب المجموعة (السوبر أدمن) فقط، عن طريق مطابقة البريد الإلكتروني المسجّل وقت التسجيل.
-        لو حسابك قائد أو عريف ونسيت كلمة المرور، اطلب من صاحب مجموعتك يغيّرها لك من تاب "القادة".
+        هنبعتلك رابط حقيقي على بريدك الإلكتروني لإعادة تعيين كلمة المرور — بيشتغل لأي حساب (سوبر، قائد، أو عريف).
       </p>
       <div class="field">
-        <label>كود المجموعة</label>
-        <input id="recGroupCode" dir="ltr" placeholder="مثال: alnajm-4821">
-      </div>
-      <div class="field">
-        <label>البريد الإلكتروني المسجّل لصاحب المجموعة</label>
+        <label>البريد الإلكتروني</label>
         <input id="recEmail" type="email" dir="ltr">
       </div>
-      <div class="field">
-        <label>كلمة المرور الجديدة</label>
-        <input id="recNewPass" type="password">
-      </div>
-      <button class="btn btn-primary" onclick="recoverPassword()">✅ تحديث كلمة المرور</button>
+      <button class="btn btn-primary" onclick="recoverPassword()">📧 ابعت رابط إعادة التعيين</button>
       <button class="btn-link" style="display:block;text-align:center;margin-top:10px" onclick="document.getElementById('recoveryCard').classList.add('hidden')">رجوع</button>
       <div id="recMsg" class="msg"></div>
     </div>
@@ -391,7 +378,7 @@
       <div class="card">
         <h2 id="memFormTitle">➕ إضافة عضو جديد</h2>
         <div class="field">
-          <label>صورة العضو/ه (اختياري)</label>
+          <label>صورة العضو (اختياري)</label>
           <div style="display:flex;align-items:center;gap:10px">
             <img id="memPhotoPreview" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
             <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
@@ -405,7 +392,7 @@
           <input id="memName" placeholder="اسم العضو بالكامل">
         </div>
         <div class="field">
-          <label>الرقم القومي د</label>
+          <label>الرقم القومي (اختياري)</label>
           <input id="memNationalId" placeholder="14 رقم" maxlength="14" dir="ltr">
         </div>
         <div class="field">
@@ -417,7 +404,7 @@
           <input id="memWhatsapp" placeholder="اختياري" dir="ltr">
         </div>
         <div class="field">
-          <label>تاريخ الميلاد </label>
+          <label>تاريخ الميلاد (اختياري)</label>
           <input id="memBirthdate" type="date" onchange="updateMemAgePreview()">
           <div id="memAgePreview" style="font-size:0.72rem;color:var(--accent);margin-top:4px"></div>
         </div>
@@ -433,11 +420,11 @@
           <select id="memRank" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem"></select>
         </div>
         <div class="field">
-          <label>الطليعة / الفرقة </label>
+          <label>الطليعة / الفرقة (اختياري)</label>
           <input id="memPatrol" placeholder="مثال: طليعة الصقور">
         </div>
         <div class="field">
-          <label>الأوسمة </label>
+          <label>الأوسمة (اختياري)</label>
           <div id="memBadgePicker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <button class="btn btn-primary" onclick="addOrUpdateMember()" id="memSaveBtn">✅ إضافة العضو</button>
@@ -461,15 +448,15 @@
           <input id="taskTitle" placeholder="مثال: تحضير مخيم نهاية الأسبوع">
         </div>
         <div class="field">
-          <label>التفاصيل </label>
+          <label>التفاصيل (اختياري)</label>
           <input id="taskDesc" placeholder="تفاصيل إضافية">
         </div>
         <div class="field">
-          <label>تاريخ التنفيذ </label>
+          <label>تاريخ الاستحقاق (اختياري)</label>
           <input id="taskDue" type="date">
         </div>
         <div class="field">
-          <label>المسؤول </label>
+          <label>المسؤول (اختياري)</label>
           <input id="taskOwner" placeholder="اسم المسؤول عن التنفيذ">
         </div>
         <button class="btn btn-primary" onclick="addTask()">✅ إضافة المهمة</button>
@@ -511,7 +498,7 @@
           <input id="annBody" placeholder="تفاصيل الإعلان">
         </div>
         <div class="field">
-          <label>صورة </label>
+          <label>صورة (اختياري)</label>
           <div style="display:flex;align-items:center;gap:10px">
             <img id="annImgPreview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
             <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
@@ -550,14 +537,14 @@
         <div class="field">
           <label>نوع النشاط</label>
           <select id="attType" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem">
-            <option value="اجتماع">اجتماع دوري</option>
+            <option value="اجتماع">اجتماع عادي</option>
             <option value="رحلة">رحلة</option>
             <option value="مخيم">مخيم</option>
             <option value="تدريب">تدريب</option>
           </select>
         </div>
         <div class="field">
-          <label>الحضور</label>
+          <label>الحاضرون</label>
           <div id="attMemberPicker" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:6px"></div>
         </div>
         <button class="btn btn-primary" onclick="saveAttendance()">✅ حفظ الحضور</button>
@@ -579,13 +566,18 @@
           <input id="ldrName" placeholder="اسم القائد/العريف">
         </div>
         <div class="field">
-          <label>رقم الموبايل (اسم الدخول)</label>
-          <input id="ldrUsername" placeholder="01xxxxxxxxx" dir="ltr">
+          <label>البريد الإلكتروني (اسم الدخول — لا يمكن تغييره بعد الإنشاء)</label>
+          <input id="ldrEmail" type="email" dir="ltr">
         </div>
         <div class="field">
-          <label>كلمة المرور</label>
-          <input id="ldrPassword" type="password" placeholder="كلمة مرور الدخول">
+          <label>رقم الموبايل (للتواصل فقط، اختياري)</label>
+          <input id="ldrUsername" placeholder="01xxxxxxxxx" dir="ltr">
         </div>
+        <div class="field" id="ldrPasswordField">
+          <label>كلمة المرور</label>
+          <input id="ldrPassword" type="password" placeholder="6 حروف/أرقام على الأقل">
+        </div>
+        <div style="font-size:0.72rem;color:var(--muted);margin:-6px 0 12px" id="ldrPassNote"></div>
         <div class="field">
           <label>الصلاحية</label>
           <div class="type-grid" id="ldrRoleGrid">
@@ -666,7 +658,7 @@
     </div>
 
     <div class="card">
-      <h2>🚧 قريبا</h2>
+      <h2>🚧 قريبًا</h2>
       <p style="color:var(--muted);font-size:0.82rem;line-height:1.8">
         باقي وحدات النظام (المهام، الشات، الإعلانات، الحضور والتقييمات)
         هيتم بناؤها في المراحل الجاية بنفس منطق العزل بتاع المجموعة اللي شغال دلوقتي.
@@ -678,7 +670,7 @@
   <footer>
     كشافتي © 2026 — جميع الحقوق محفوظة<br>
     تطوير وإدارة: <b>شادي محمد حجاب</b><br>
-    📱 <a href="tel:+201006857145">+201006857145</a> &nbsp;|&nbsp;
+    📱 <a href="tel:+201006857145">+20 100 685 7145</a> &nbsp;|&nbsp;
     ✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a>
   </footer>
 </div>
@@ -686,23 +678,29 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, doc, addDoc, updateDoc, getDoc, getDocs,
-  query, where, orderBy, serverTimestamp, setDoc, onSnapshot, deleteDoc
+  query, orderBy, serverTimestamp, setDoc, onSnapshot, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, sendPasswordResetEmail, updatePassword
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ⚠️ استبدل القيم دي بإعدادات مشروع Firebase الخاص بـ "كشافتي"
 // (لازم يكون مشروع Firebase جديد منفصل عن مشروع أسد البحار)
-const fb = initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyAWP4Hd88SMtNZ9U01UmC3hGN9E29_tcqg",
   authDomain: "kashafty-6d806.firebaseapp.com",
   projectId: "kashafty-6d806",
   storageBucket: "kashafty-6d806.firebasestorage.app",
   messagingSenderId: "538811542609",
   appId: "1:538811542609:web:e2c4201cdd068c74c35c70"
-});
+};
+const fb = initializeApp(firebaseConfig);
 const db = getFirestore(fb);
+const auth = getAuth(fb);
 const GROUPS = collection(db, 'groups');
 
 // ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
@@ -764,31 +762,23 @@ window.showScreen=function(name){
 
 window.showRecovery=function(){
   document.getElementById('recoveryCard').classList.remove('hidden');
-  document.getElementById('recGroupCode').value=document.getElementById('loginGroupCode').value;
+  document.getElementById('recEmail').value=document.getElementById('loginEmail').value;
 };
 
 window.recoverPassword=async function(){
-  const code=document.getElementById('recGroupCode').value.trim();
-  const email=document.getElementById('recEmail').value.trim().toLowerCase();
-  const newPass=document.getElementById('recNewPass').value;
+  const email=document.getElementById('recEmail').value.trim();
   const msgEl=document.getElementById('recMsg');
   msgEl.className='msg';msgEl.textContent='';
-  if(!code||!email||!newPass){msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;}
+  if(!email){msgEl.className='msg err';msgEl.textContent='اكتب البريد الإلكتروني ⚠️';return;}
   try{
-    const groupSnap=await getDoc(doc(db,'groups',code));
-    if(!groupSnap.exists()){msgEl.className='msg err';msgEl.textContent='كود المجموعة غير صحيح ❌';return;}
-    const groupData=groupSnap.data();
-    if((groupData.ownerEmail||'').trim().toLowerCase()!==email){
-      msgEl.className='msg err';msgEl.textContent='البريد الإلكتروني غير مطابق ❌';return;
-    }
-    const adminsSnap=await getDocs(query(collection(db,'groups',code,'admins'), where('role','==','super')));
-    if(adminsSnap.empty){msgEl.className='msg err';msgEl.textContent='تعذّر إيجاد حساب المالك ❌';return;}
-    const superDoc=adminsSnap.docs[0];
-    await updateDoc(doc(db,'groups',code,'admins',superDoc.id),{password:newPass});
-    msgEl.className='msg ok';msgEl.textContent='تم تحديث كلمة المرور ✅ سجّل دخول بيها دلوقتي';
-    toast('تم تحديث كلمة المرور ✅');
+    await sendPasswordResetEmail(auth, email);
+    msgEl.className='msg ok';msgEl.textContent='تم إرسال رابط إعادة التعيين ✅ افتح إيميلك';
+    toast('تم إرسال الرابط ✅');
   }catch(e){
-    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+    const msg = e.code==='auth/user-not-found' ? 'مفيش حساب بالبريد الإلكتروني ده ❌'
+      : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
+      : 'حصل خطأ: '+e.message;
+    msgEl.className='msg err';msgEl.textContent=msg;
   }
 };
 
@@ -802,16 +792,17 @@ window.changeMyPassword=async function(){
   const p1=document.getElementById('newPass1').value;
   const p2=document.getElementById('newPass2').value;
   const msgEl=document.getElementById('passMsg');
-  if(!p1||p1.length<4){msgEl.className='msg err';msgEl.textContent='كلمة المرور لازم تكون 4 حروف/أرقام على الأقل ⚠️';return;}
+  if(!p1||p1.length<6){msgEl.className='msg err';msgEl.textContent='كلمة المرور لازم تكون 6 حروف/أرقام على الأقل ⚠️';return;}
   if(p1!==p2){msgEl.className='msg err';msgEl.textContent='كلمتا المرور غير متطابقتين ❌';return;}
   try{
-    await updateDoc(doc(db,'groups',currentGroupCode,'admins',currentAdmin.id),{password:p1});
+    await updatePassword(auth.currentUser, p1);
     document.getElementById('newPass1').value='';
     document.getElementById('newPass2').value='';
     msgEl.className='msg ok';msgEl.textContent='تم تحديث كلمة المرور ✅';
     toast('تم تحديث كلمة المرور ✅');
   }catch(e){
-    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+    const msg = e.code==='auth/requires-recent-login' ? 'الجلسة قديمة، سجّل خروج وادخل تاني وجرب من جديد ⚠️' : 'حصل خطأ: '+e.message;
+    msgEl.className='msg err';msgEl.textContent=msg;
   }
 };
 
@@ -856,54 +847,70 @@ window.registerGroup=async function(){
   const msgEl=document.getElementById('regMsg');
   msgEl.className='msg';msgEl.textContent='';
 
-  if(!name||!ownerName||!ownerPhone||!password){
-    msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة ⚠️';return;
+  if(!name||!ownerName||!ownerPhone||!ownerEmail||!password){
+    msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة (البريد الإلكتروني إلزامي دلوقتي) ⚠️';return;
   }
   const groupCode = slugify(name)+'-'+Math.floor(1000+Math.random()*9000);
 
   try{
+    const cred=await createUserWithEmailAndPassword(auth, ownerEmail, password);
+    const uid=cred.user.uid;
     await setDoc(doc(db,'groups',groupCode),{
       name, type, ownerName, ownerPhone, ownerEmail,
-      accentColor: selColor, logoUrl:'', createdAt: serverTimestamp()
+      accentColor: selColor, logoUrl:'', publicMembersEnabled:false, featuredVideoUrl:'', createdAt: serverTimestamp()
     });
-    await addDoc(collection(db,'groups',groupCode,'admins'),{
-      username: ownerPhone, password, name: ownerName, role:'super', createdAt: serverTimestamp()
+    await setDoc(doc(db,'groups',groupCode,'admins',uid),{
+      name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super', createdAt: serverTimestamp()
     });
+    await setDoc(doc(db,'adminIndex',uid),{ groupId: groupCode, role:'super' });
     document.getElementById('newGroupCode').textContent=groupCode;
     document.getElementById('regSuccess').classList.remove('hidden');
     toast('تم إنشاء المجموعة بنجاح ✅');
   }catch(e){
-    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+    const msg = e.code==='auth/email-already-in-use' ? 'البريد الإلكتروني ده مسجّل بحساب تاني بالفعل ⚠️'
+      : e.code==='auth/weak-password' ? 'كلمة المرور ضعيفة، اختار كلمة أقوى (6 حروف على الأقل) ⚠️'
+      : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
+      : 'حصل خطأ: '+e.message;
+    msgEl.className='msg err';msgEl.textContent=msg;
   }
 };
 
 // ===== LOGIN =====
 window.loginGroup=async function(){
-  const code=document.getElementById('loginGroupCode').value.trim();
-  const user=document.getElementById('loginUser').value.trim();
+  const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
   const msgEl=document.getElementById('loginMsg');
   msgEl.className='msg';msgEl.textContent='';
 
-  if(!code||!user||!pass){
+  if(!email||!pass){
     msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;
   }
   try{
-    const groupSnap=await getDoc(doc(db,'groups',code));
-    if(!groupSnap.exists()){
-      msgEl.className='msg err';msgEl.textContent='كود المجموعة غير صحيح ❌';return;
+    const cred=await signInWithEmailAndPassword(auth, email, pass);
+    const uid=cred.user.uid;
+    const idxSnap=await getDoc(doc(db,'adminIndex',uid));
+    if(!idxSnap.exists()){
+      msgEl.className='msg err';msgEl.textContent='الحساب ده مش مرتبط بأي مجموعة ❌';
+      await signOut(auth);
+      return;
     }
-    const adminsSnap=await getDocs(query(collection(db,'groups',code,'admins'), where('username','==',user)));
-    let found=null;
-    adminsSnap.forEach(d=>{ if(d.data().password===pass) found={id:d.id,...d.data()}; });
-    if(!found){
-      msgEl.className='msg err';msgEl.textContent='اسم المستخدم أو كلمة المرور غلط ❌';return;
+    const { groupId } = idxSnap.data();
+    const groupSnap=await getDoc(doc(db,'groups',groupId));
+    const adminSnap=await getDoc(doc(db,'groups',groupId,'admins',uid));
+    if(!groupSnap.exists()||!adminSnap.exists()){
+      msgEl.className='msg err';msgEl.textContent='تعذّر تحميل بيانات الحساب ❌';
+      await signOut(auth);
+      return;
     }
-    currentGroupCode=code;
-    currentAdmin=found;
+    currentGroupCode=groupId;
+    currentAdmin={ id:uid, ...adminSnap.data() };
     enterApp(groupSnap.data());
   }catch(e){
-    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+    const msg = (e.code==='auth/wrong-password'||e.code==='auth/user-not-found'||e.code==='auth/invalid-credential') ? 'البريد الإلكتروني أو كلمة المرور غلط ❌'
+      : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
+      : e.code==='auth/too-many-requests' ? 'محاولات كتير غلط، جرب تاني بعد شوية ⏳'
+      : 'حصل خطأ: '+e.message;
+    msgEl.className='msg err';msgEl.textContent=msg;
   }
 };
 
@@ -960,6 +967,7 @@ window.switchTab=function(btn){
 };
 
 window.doLogout=function(){
+  signOut(auth).catch(()=>{});
   currentGroupCode=null;currentAdmin=null;
   if(membersUnsub){membersUnsub();membersUnsub=null;}
   if(leadersUnsub){leadersUnsub();leadersUnsub=null;}
@@ -1079,7 +1087,7 @@ function renderMembersList(){
 }
 
 const BADGE_PRESETS=[
-  {id:'leader',emoji:'🏅',label:'العريف المثالي'},
+  {id:'leader',emoji:'🏅',label:'القائد المثالي'},
   {id:'committed',emoji:'🎯',label:'الأكثر التزامًا'},
   {id:'team',emoji:'🤝',label:'روح الفريق'},
   {id:'energetic',emoji:'🔥',label:'الأكثر حماسًا'},
@@ -1235,7 +1243,7 @@ function renderLeadersList(){
       <div class="mem-avatar">${l.role==='leader'?'🧑‍✈️':'🎖️'}</div>
       <div class="mem-info">
         <div class="name">${esc(l.name)}${isMe?' (أنت)':''}</div>
-        <div class="meta">${esc(l.username)} · ${roleLabel}</div>
+        <div class="meta">${esc(l.email||'')} · ${roleLabel}</div>
       </div>
       <div class="mem-actions">
         <button class="icon-btn" onclick="editLeader('${l.id}')" title="تعديل">✏️</button>
@@ -1245,18 +1253,33 @@ function renderLeadersList(){
   }).join('');
 }
 
+// Creates a brand-new Firebase Auth account WITHOUT signing the current
+// (super admin) session out — done via a short-lived secondary app instance.
+async function createLeaderAuthAccount(email, password){
+  const secondaryApp=initializeApp(firebaseConfig, 'secondary-'+Date.now());
+  const secondaryAuth=getAuth(secondaryApp);
+  try{
+    const cred=await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    const uid=cred.user.uid;
+    await signOut(secondaryAuth);
+    return uid;
+  }finally{
+    await deleteApp(secondaryApp).catch(()=>{});
+  }
+}
+
 window.addOrUpdateLeader=async function(){
   if(!currentGroupCode)return;
   const name=document.getElementById('ldrName').value.trim();
+  const email=document.getElementById('ldrEmail').value.trim();
   const username=document.getElementById('ldrUsername').value.trim();
   const password=document.getElementById('ldrPassword').value;
   const patrol=document.getElementById('ldrPatrol').value.trim();
   const msgEl=document.getElementById('ldrMsg');
-  if(!name||!username){msgEl.className='msg err';msgEl.textContent='اكتب الاسم واسم الدخول ⚠️';return;}
-  if(!editingLeaderId && !password){msgEl.className='msg err';msgEl.textContent='اكتب كلمة مرور ⚠️';return;}
+  if(!name||!email){msgEl.className='msg err';msgEl.textContent='اكتب الاسم والبريد الإلكتروني ⚠️';return;}
+  if(!editingLeaderId && (!password||password.length<6)){msgEl.className='msg err';msgEl.textContent='كلمة المرور 6 حروف/أرقام على الأقل ⚠️';return;}
   const data={ name, username, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
-  if(password) data.password=password;
-  // Password-free copy for the public app — never include password/username here
+  // Password-free copy for the public app — never include password/email here
   const publicData={ name, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
   try{
     let leaderId=editingLeaderId;
@@ -1264,16 +1287,22 @@ window.addOrUpdateLeader=async function(){
       await updateDoc(doc(db,'groups',currentGroupCode,'admins',editingLeaderId), data);
       msgEl.className='msg ok';msgEl.textContent='تم تعديل البيانات ✅';
     }else{
+      leaderId=await createLeaderAuthAccount(email, password);
+      data.email=email;
       data.createdAt=serverTimestamp();
-      const ref=await addDoc(collection(db,'groups',currentGroupCode,'admins'), data);
-      leaderId=ref.id;
+      await setDoc(doc(db,'groups',currentGroupCode,'admins',leaderId), data);
+      await setDoc(doc(db,'adminIndex',leaderId),{ groupId: currentGroupCode, role: ldrRole });
       msgEl.className='msg ok';msgEl.textContent='تمت الإضافة ✅';
     }
     await setDoc(doc(db,'groups',currentGroupCode,'publicLeaders',leaderId), publicData);
     toast('تم الحفظ ✅');
     resetLeaderForm();
   }catch(e){
-    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+    const msg = e.code==='auth/email-already-in-use' ? 'البريد الإلكتروني ده مستخدم بحساب تاني بالفعل ⚠️'
+      : e.code==='auth/weak-password' ? 'كلمة المرور ضعيفة ⚠️'
+      : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
+      : 'حصل خطأ: '+e.message;
+    msgEl.className='msg err';msgEl.textContent=msg;
   }
 };
 
@@ -1282,8 +1311,11 @@ window.editLeader=function(id){
   if(!l)return;
   editingLeaderId=id;
   document.getElementById('ldrName').value=l.name||'';
+  document.getElementById('ldrEmail').value=l.email||'';
+  document.getElementById('ldrEmail').disabled=true;
   document.getElementById('ldrUsername').value=l.username||'';
-  document.getElementById('ldrPassword').value='';
+  document.getElementById('ldrPasswordField').style.display='none';
+  document.getElementById('ldrPassNote').textContent='القائد/العريف هو الوحيد اللي يقدر يغيّر كلمة مروره بنفسه (من تاب الإعدادات بعد ما يسجّل دخول).';
   document.getElementById('ldrPatrol').value=l.patrol||'';
   ldrRole=l.role==='patrol'?'patrol':'leader';
   document.querySelectorAll('#ldrRoleGrid .type-opt').forEach(o=>o.classList.toggle('sel', o.dataset.role===ldrRole));
@@ -1297,8 +1329,12 @@ window.editLeader=function(id){
 window.resetLeaderForm=function(){
   editingLeaderId=null;
   document.getElementById('ldrName').value='';
+  document.getElementById('ldrEmail').value='';
+  document.getElementById('ldrEmail').disabled=false;
   document.getElementById('ldrUsername').value='';
+  document.getElementById('ldrPasswordField').style.display='block';
   document.getElementById('ldrPassword').value='';
+  document.getElementById('ldrPassNote').textContent='';
   document.getElementById('ldrPatrol').value='';
   ldrRole='leader';
   document.querySelectorAll('#ldrRoleGrid .type-opt').forEach((o,i)=>o.classList.toggle('sel', i===0));
@@ -1311,10 +1347,11 @@ window.resetLeaderForm=function(){
 
 window.deleteLeader=async function(id){
   if(currentAdmin && id===currentAdmin.id){toast('متقدرش تحذف حسابك بنفسك ⚠️');return;}
-  if(!confirm('حذف هذا الحساب؟'))return;
+  if(!confirm('حذف هذا الحساب؟ (هيتحذف من قاعدة البيانات، ولازم تحذف حساب الدخول بتاعه يدويًا من Firebase Console)'))return;
   try{
     await deleteDoc(doc(db,'groups',currentGroupCode,'admins',id));
     await deleteDoc(doc(db,'groups',currentGroupCode,'publicLeaders',id)).catch(()=>{});
+    await deleteDoc(doc(db,'adminIndex',id)).catch(()=>{});
     toast('تم الحذف ✅');
   }catch(e){
     toast('حصل خطأ: '+e.message);
