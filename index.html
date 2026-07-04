@@ -65,6 +65,23 @@
   .mem-actions{display:flex;gap:4px}
   .icon-btn{background:none;border:none;cursor:pointer;font-size:0.95rem;padding:4px}
 
+  .chat-bubble{max-width:85%;padding:9px 12px;border-radius:14px;font-size:0.82rem;line-height:1.5;word-break:break-word}
+  .chat-bubble .sender{font-size:0.68rem;font-weight:700;color:var(--accent);margin-bottom:3px}
+  .chat-bubble .time{font-size:0.62rem;color:var(--muted);margin-top:4px;text-align:left;direction:ltr}
+  .chat-bubble.mine{align-self:flex-end;background:var(--accent);color:#0a1830}
+  .chat-bubble.mine .sender{color:#0a1830;opacity:.75}
+  .chat-bubble.mine .time{color:#0a1830;opacity:.6}
+  .chat-bubble.other{align-self:flex-start;background:rgba(255,255,255,0.08)}
+
+  .stat-box{background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+  .stat-box .num{font-size:1.4rem;font-weight:800;color:var(--accent)}
+  .stat-box .lbl{font-size:0.7rem;color:var(--muted);margin-top:2px}
+
+  .badge-chip{padding:6px 10px;border-radius:14px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:Cairo,sans-serif;font-size:0.72rem;cursor:pointer}
+  .badge-chip.sel{background:var(--accent);color:#0a1830;border-color:var(--accent)}
+  .mem-badges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+  .mem-badges span{font-size:0.85rem}
+
   .card{
     background:var(--card);
     border:1px solid var(--border);
@@ -161,7 +178,79 @@
       <h2>ابدأ من هنا</h2>
       <button class="btn btn-primary" onclick="showScreen('login')">🔑 تسجيل الدخول لمجموعتي</button>
       <button class="btn btn-outline" onclick="showScreen('register')">➕ سجّل مجموعتك الكشفية الآن</button>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="openDirectory()">🔍 تصفّح المجموعات المسجّلة</button>
     </div>
+  </div>
+
+  <!-- ===================== SCREEN: DIRECTORY (public, no login) ===================== -->
+  <div id="scr-directory" class="hidden">
+    <div class="card">
+      <h2>🔍 المجموعات المسجّلة في كشافتي</h2>
+      <input id="dirSearch" placeholder="ابحث باسم المجموعة..." oninput="renderDirectory()" style="width:100%;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.84rem;outline:none;margin-bottom:10px">
+      <div class="tab-bar" id="dirTypeTabs">
+        <button class="tab-btn sel" data-type="الكل" onclick="filterDirectory(this)">الكل</button>
+        <button class="tab-btn" data-type="بحرية" onclick="filterDirectory(this)">⚓ بحرية</button>
+        <button class="tab-btn" data-type="جوية" onclick="filterDirectory(this)">✈️ جوية</button>
+        <button class="tab-btn" data-type="فتيان" onclick="filterDirectory(this)">🏕️ فتيان</button>
+        <button class="tab-btn" data-type="مرشدات" onclick="filterDirectory(this)">🌸 مرشدات</button>
+      </div>
+      <div id="dirList" style="margin-top:10px"></div>
+      <button class="btn-link" style="display:block;text-align:center;margin-top:14px" onclick="showScreen('home')">رجوع</button>
+    </div>
+  </div>
+
+  <!-- ===================== SCREEN: PUBLIC MEMBERS VIEW (no login) ===================== -->
+  <div id="scr-public-members" class="hidden">
+    <div class="gh-wrap">
+      <div class="gh-logo-wrap">
+        <div class="gh-logo-circle">
+          <div class="gh-fallback" id="pubLogoFallback">🧭</div>
+          <img id="pubLogoImg" style="display:none">
+        </div>
+      </div>
+      <h2 id="pubGroupName"></h2>
+    </div>
+
+    <div class="tab-bar" id="pubTabBar">
+      <button class="tab-btn sel" data-ptab="ann" onclick="switchPubTab(this)">📢 إعلانات</button>
+      <button class="tab-btn" data-ptab="video" onclick="switchPubTab(this)">📺 فيديو</button>
+      <button class="tab-btn" data-ptab="tasks" onclick="switchPubTab(this)">📋 مهام</button>
+      <button class="tab-btn" data-ptab="leaders" onclick="switchPubTab(this)">🧑‍✈️ قادة</button>
+      <button class="tab-btn" data-ptab="members" onclick="switchPubTab(this)">👥 أعضاء</button>
+      <button class="tab-btn" data-ptab="rank" onclick="switchPubTab(this)">🏆 ترتيب</button>
+    </div>
+
+    <div id="ptab-ann" class="tab-panel">
+      <div class="card"><div id="pubAnnList"></div></div>
+    </div>
+
+    <div id="ptab-video" class="tab-panel hidden">
+      <div class="card"><div id="pubVideoBox" style="text-align:center;color:var(--muted);font-size:0.82rem;padding:20px 0">لا يوجد فيديو مميز بعد</div></div>
+    </div>
+
+    <div id="ptab-tasks" class="tab-panel hidden">
+      <div class="card"><div id="pubTaskList"></div></div>
+    </div>
+
+    <div id="ptab-leaders" class="tab-panel hidden">
+      <div class="card"><div id="pubLeaderList"></div></div>
+    </div>
+
+    <div id="ptab-members" class="tab-panel hidden">
+      <div class="card">
+        <input id="pubMemSearch" placeholder="ابحث باسم عضو..." oninput="renderPublicMembers()" style="width:100%;padding:9px;background:rgba(0,0,0,0.2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.8rem;outline:none;margin-bottom:10px">
+        <div id="pubMemList"></div>
+      </div>
+    </div>
+
+    <div id="ptab-rank" class="tab-panel hidden">
+      <div class="card">
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:10px">الترتيب = عدد مرات الحضور + عدد الأوسمة + المهام المنجزة لطليعة العضو</p>
+        <div id="pubRankList"></div>
+      </div>
+    </div>
+
+    <button class="btn-link" style="display:block;text-align:center;margin-top:6px" onclick="showScreen('home')">رجوع</button>
   </div>
 
   <!-- ===================== SCREEN: REGISTER GROUP ===================== -->
@@ -290,6 +379,9 @@
     <div class="tab-bar">
       <button class="tab-btn sel" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
       <button class="tab-btn" data-tab="tasks" onclick="switchTab(this)">📋 المهام</button>
+      <button class="tab-btn" data-tab="chat" onclick="switchTab(this)">💬 الشات</button>
+      <button class="tab-btn" data-tab="ann" onclick="switchTab(this)">📢 الإعلانات</button>
+      <button class="tab-btn" data-tab="stats" onclick="switchTab(this)">📊 الحضور</button>
       <button class="tab-btn" data-tab="leaders" onclick="switchTab(this)" id="leadersTabBtn" style="display:none">🧑‍✈️ القادة</button>
       <button class="tab-btn" data-tab="settings" onclick="switchTab(this)">⚙️ الإعدادات</button>
     </div>
@@ -299,8 +391,22 @@
       <div class="card">
         <h2 id="memFormTitle">➕ إضافة عضو جديد</h2>
         <div class="field">
+          <label>صورة العضو (اختياري)</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <img id="memPhotoPreview" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
+            <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
+              📎 اختار صورة
+              <input type="file" id="memPhotoInput" accept="image/*" onchange="handleMemPhotoPick(this)" style="display:none">
+            </label>
+          </div>
+        </div>
+        <div class="field">
           <label>الاسم</label>
           <input id="memName" placeholder="اسم العضو بالكامل">
+        </div>
+        <div class="field">
+          <label>الرقم القومي (اختياري)</label>
+          <input id="memNationalId" placeholder="14 رقم" maxlength="14" dir="ltr">
         </div>
         <div class="field">
           <label>رقم الموبايل</label>
@@ -311,6 +417,11 @@
           <input id="memWhatsapp" placeholder="اختياري" dir="ltr">
         </div>
         <div class="field">
+          <label>تاريخ الميلاد (اختياري)</label>
+          <input id="memBirthdate" type="date" onchange="updateMemAgePreview()">
+          <div id="memAgePreview" style="font-size:0.72rem;color:var(--accent);margin-top:4px"></div>
+        </div>
+        <div class="field">
           <label>النوع</label>
           <div class="type-grid" id="memGenderGrid">
             <div class="type-opt sel" data-gender="male" onclick="selGender(this)"><span class="emoji">👦</span>ذكر</div>
@@ -318,8 +429,16 @@
           </div>
         </div>
         <div class="field">
+          <label>الصفة الكشفية</label>
+          <select id="memRank" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem"></select>
+        </div>
+        <div class="field">
           <label>الطليعة / الفرقة (اختياري)</label>
           <input id="memPatrol" placeholder="مثال: طليعة الصقور">
+        </div>
+        <div class="field">
+          <label>الأوسمة (اختياري)</label>
+          <div id="memBadgePicker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <button class="btn btn-primary" onclick="addOrUpdateMember()" id="memSaveBtn">✅ إضافة العضو</button>
         <button class="btn btn-outline" onclick="resetMemberForm()" id="memCancelBtn" style="display:none">إلغاء التعديل</button>
@@ -360,6 +479,94 @@
       <div class="card">
         <h2>📋 قائمة المهام (<span id="taskCount">0</span>)</h2>
         <div id="taskList"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: CHAT ===== -->
+    <div id="tab-chat" class="tab-panel hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h2 style="margin:0">💬 شات الإدارة</h2>
+          <button class="btn-link" id="clearChatBtn" onclick="clearGroupChat()" style="display:none;color:#e57373">🗑️ مسح الكل</button>
+        </div>
+        <div id="chatList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input id="chatInput" placeholder="اكتب رسالة..." maxlength="500" style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.82rem;outline:none" onkeydown="if(event.key==='Enter')sendChatMessage()">
+          <button class="btn btn-primary" style="width:auto;padding:10px 18px" id="chatSendBtn" onclick="sendChatMessage()">إرسال</button>
+        </div>
+        <div id="chatMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: ANNOUNCEMENTS ===== -->
+    <div id="tab-ann" class="tab-panel hidden">
+      <div class="card" id="annFormCard">
+        <h2 id="annFormTitle">➕ إعلان جديد</h2>
+        <div class="field">
+          <label>عنوان الإعلان</label>
+          <input id="annTitle" placeholder="عنوان الإعلان">
+        </div>
+        <div class="field">
+          <label>النص</label>
+          <input id="annBody" placeholder="تفاصيل الإعلان">
+        </div>
+        <div class="field">
+          <label>صورة (اختياري)</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <img id="annImgPreview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
+            <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
+              📎 اختار صورة
+              <input type="file" id="annImgInput" accept="image/*" onchange="handleAnnImagePick(this)" style="display:none">
+            </label>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--muted);margin-bottom:12px;cursor:pointer">
+          <input type="checkbox" id="annPinned" style="width:16px;height:16px"> 📌 تثبيت الإعلان فوق القائمة
+        </label>
+        <button class="btn btn-primary" onclick="addOrUpdateAnn()" id="annSaveBtn">✅ نشر الإعلان</button>
+        <button class="btn btn-outline" onclick="resetAnnForm()" id="annCancelBtn" style="display:none">إلغاء التعديل</button>
+        <div id="annMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 الإعلانات (<span id="annCount">0</span>)</h2>
+        <div id="annList"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: STATS / ATTENDANCE ===== -->
+    <div id="tab-stats" class="tab-panel hidden">
+      <div class="card">
+        <h2>📊 نظرة عامة</h2>
+        <div id="statsOverview" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      </div>
+
+      <div class="card" id="attFormCard">
+        <h2>➕ تسجيل حضور</h2>
+        <div class="field">
+          <label>التاريخ</label>
+          <input id="attDate" type="date">
+        </div>
+        <div class="field">
+          <label>نوع النشاط</label>
+          <select id="attType" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem">
+            <option value="اجتماع">اجتماع عادي</option>
+            <option value="رحلة">رحلة</option>
+            <option value="مخيم">مخيم</option>
+            <option value="تدريب">تدريب</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>الحاضرون</label>
+          <div id="attMemberPicker" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:6px"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveAttendance()">✅ حفظ الحضور</button>
+        <div id="attMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 سجل الحضور (<span id="attCount">0</span>)</h2>
+        <div id="attList"></div>
       </div>
     </div>
 
@@ -423,6 +630,14 @@
         <label>لون المجموعة</label>
         <div class="swatches" id="setColorSwatches"></div>
       </div>
+      <div class="field">
+        <label>رابط فيديو يوتيوب مميز (اختياري)</label>
+        <input id="setVideoUrl" placeholder="https://youtube.com/watch?v=..." dir="ltr">
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.78rem;color:var(--muted);margin-bottom:14px;cursor:pointer;line-height:1.6">
+        <input type="checkbox" id="setPublicMembers" style="width:16px;height:16px;margin-top:2px">
+        🌐 السماح لأي حد عنده كود المجموعة يفتح تطبيق الأعضاء العام (إعلانات، فيديو، مهام، قادة، أعضاء، ترتيب) بدون تسجيل دخول — من غير أرقام موبايل أو بيانات حساسة. افتراضيًا مقفول لحماية خصوصية الأعضاء.
+      </label>
       <button class="btn btn-primary" onclick="saveGroupSettings()">💾 حفظ التعديلات</button>
       <div id="setMsg" class="msg"></div>
     </div>
@@ -474,7 +689,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, doc, addDoc, updateDoc, getDoc, getDocs,
-  query, where, serverTimestamp, setDoc, onSnapshot, deleteDoc
+  query, where, orderBy, serverTimestamp, setDoc, onSnapshot, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ⚠️ استبدل القيم دي بإعدادات مشروع Firebase الخاص بـ "كشافتي"
@@ -538,7 +753,7 @@ function toast(msg){
 function esc(s){return (s||'').toString().replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
 window.showScreen=function(name){
-  ['home','register','login'].forEach(s=>{
+  ['home','register','login','directory','public-members'].forEach(s=>{
     document.getElementById('scr-'+s).classList.toggle('hidden', s!==name);
   });
   document.getElementById('regSuccess').classList.add('hidden');
@@ -700,6 +915,8 @@ function enterApp(groupData){
   document.getElementById('whoName').textContent=currentAdmin.name;
   document.getElementById('ghGroupName').textContent=groupData.name;
   document.getElementById('setGroupName').value=groupData.name;
+  document.getElementById('setPublicMembers').checked=!!groupData.publicMembersEnabled;
+  document.getElementById('setVideoUrl').value=groupData.featuredVideoUrl||'';
   document.getElementById('settingsGroupCode').textContent=currentGroupCode;
   setSelColor=groupData.accentColor||PALETTE[0];
   applyAccent(setSelColor);
@@ -717,13 +934,23 @@ function enterApp(groupData){
   }
   startMembersSubscription();
   startTasksSubscription();
-  const ldrTabBtn=document.getElementById('leadersTabBtn');
+  startChatSubscription();
+  startAnnSubscription();
+  startAttendanceSubscription();
+  renderMemBadgePicker();
+  populateMemRankOptions();
   if(currentAdmin.role==='super'){
     ldrTabBtn.style.display='inline-block';
     startLeadersSubscription();
   }else{
     ldrTabBtn.style.display='none';
   }
+  const clearBtn=document.getElementById('clearChatBtn');
+  if(clearBtn) clearBtn.style.display = currentAdmin.role==='super' ? 'inline-block' : 'none';
+  const annFormCard=document.getElementById('annFormCard');
+  if(annFormCard) annFormCard.style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
+  const attFormCard=document.getElementById('attFormCard');
+  if(attFormCard) attFormCard.style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
 }
 
 window.switchTab=function(btn){
@@ -737,7 +964,10 @@ window.doLogout=function(){
   if(membersUnsub){membersUnsub();membersUnsub=null;}
   if(leadersUnsub){leadersUnsub();leadersUnsub=null;}
   if(tasksUnsub){tasksUnsub();tasksUnsub=null;}
-  members=[];leaders=[];tasks=[];
+  if(chatUnsub){chatUnsub();chatUnsub=null;}
+  if(annUnsub){annUnsub();annUnsub=null;}
+  if(attUnsub){attUnsub();attUnsub=null;}
+  members=[];leaders=[];tasks=[];chatMessages=[];anns=[];attendanceRecords=[];
   document.getElementById('app').style.display='none';
   applyAccent(PALETTE[0]);
   showScreen('home');
@@ -748,6 +978,49 @@ let members=[];
 let membersUnsub=null;
 let editingMemberId=null;
 let memGender='male';
+let pendingMemPhoto=null; // null=no change, ''=removed, string=new photo
+
+const RANK_OPTIONS={
+  male:['أشبال','كشاف','متقدم','جوال'],
+  female:['زهرات','مرشدة','متقدمة','جوالة']
+};
+
+function populateMemRankOptions(selected){
+  const sel=document.getElementById('memRank');
+  if(!sel)return;
+  sel.innerHTML=RANK_OPTIONS[memGender].map(r=>`<option value="${r}" ${r===selected?'selected':''}>${r}</option>`).join('');
+}
+
+function calcAge(birthdate){
+  if(!birthdate)return null;
+  const b=new Date(birthdate);
+  if(isNaN(b))return null;
+  const now=new Date();
+  let age=now.getFullYear()-b.getFullYear();
+  const m=now.getMonth()-b.getMonth();
+  if(m<0||(m===0&&now.getDate()<b.getDate())) age--;
+  return age>=0&&age<120?age:null;
+}
+
+window.updateMemAgePreview=function(){
+  const bd=document.getElementById('memBirthdate').value;
+  const age=calcAge(bd);
+  const el=document.getElementById('memAgePreview');
+  if(el) el.textContent = age!==null ? `العمر الحالي: ${age} سنة` : '';
+};
+
+window.handleMemPhotoPick=async function(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  try{
+    const dataUrl=await resizeImageToDataUrl(file,300);
+    pendingMemPhoto=dataUrl;
+    const prev=document.getElementById('memPhotoPreview');
+    prev.src=dataUrl;prev.style.display='block';
+  }catch(e){
+    toast('تعذّر معالجة الصورة ⚠️');
+  }
+};
 
 function startMembersSubscription(){
   if(membersUnsub){membersUnsub();membersUnsub=null;}
@@ -755,6 +1028,8 @@ function startMembersSubscription(){
   membersUnsub=onSnapshot(col, snap=>{
     members=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderMembersList();
+    renderAttMemberPicker();
+    renderStatsOverview();
   });
 }
 
@@ -762,6 +1037,7 @@ window.selGender=function(el){
   document.querySelectorAll('#memGenderGrid .type-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel');
   memGender=el.dataset.gender;
+  populateMemRankOptions();
 };
 
 function renderMembersList(){
@@ -778,12 +1054,21 @@ function renderMembersList(){
   }
   el.innerHTML=filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar')).map(m=>{
     const icon=m.gender==='female'?'👧':'👦';
+    const avatar=m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:icon;
     const patrol=m.patrol?` · طليعة ${esc(m.patrol)}`:'';
+    const age=calcAge(m.birthdate);
+    const ageTxt=age!==null?` · ${age} سنة`:'';
+    const rankTxt=m.rank?` · ${esc(m.rank)}`:'';
+    const badgesHtml=(m.badges&&m.badges.length)?`<div class="mem-badges">${m.badges.map(bId=>{
+      const b=BADGE_PRESETS.find(x=>x.id===bId);
+      return b?`<span title="${esc(b.label)}">${b.emoji}</span>`:'';
+    }).join('')}</div>`:'';
     return `<div class="mem-row">
-      <div class="mem-avatar">${icon}</div>
+      <div class="mem-avatar">${avatar}</div>
       <div class="mem-info">
-        <div class="name">${esc(m.name)}</div>
-        <div class="meta">${esc(m.phone||'بدون رقم')}${patrol}</div>
+        <div class="name">${esc(m.name)}${rankTxt}</div>
+        <div class="meta">${esc(m.phone||'بدون رقم')}${patrol}${ageTxt}</div>
+        ${badgesHtml}
       </div>
       <div class="mem-actions">
         <button class="icon-btn" onclick="editMember('${m.id}')" title="تعديل">✏️</button>
@@ -793,20 +1078,53 @@ function renderMembersList(){
   }).join('');
 }
 
+const BADGE_PRESETS=[
+  {id:'leader',emoji:'🏅',label:'القائد المثالي'},
+  {id:'committed',emoji:'🎯',label:'الأكثر التزامًا'},
+  {id:'team',emoji:'🤝',label:'روح الفريق'},
+  {id:'energetic',emoji:'🔥',label:'الأكثر حماسًا'},
+  {id:'excellent',emoji:'📚',label:'المتفوق'},
+  {id:'creative',emoji:'🎨',label:'الأكثر إبداعًا'},
+  {id:'strong',emoji:'💪',label:'الأقوى تحملاً'},
+  {id:'star',emoji:'🌟',label:'نجم الشهر'},
+  {id:'scout',emoji:'🧭',label:'أفضل كشاف'},
+  {id:'kind',emoji:'❤️',label:'الأكثر تعاونًا'}
+];
+let memSelectedBadges=[];
+
+function renderMemBadgePicker(){
+  const el=document.getElementById('memBadgePicker');
+  if(!el)return;
+  el.innerHTML=BADGE_PRESETS.map(b=>
+    `<button type="button" class="badge-chip${memSelectedBadges.includes(b.id)?' sel':''}" onclick="toggleMemBadge('${b.id}')">${b.emoji} ${esc(b.label)}</button>`
+  ).join('');
+}
+window.toggleMemBadge=function(id){
+  if(memSelectedBadges.includes(id)) memSelectedBadges=memSelectedBadges.filter(x=>x!==id);
+  else memSelectedBadges.push(id);
+  renderMemBadgePicker();
+};
+
 window.addOrUpdateMember=async function(){
   if(!currentGroupCode)return;
   const name=document.getElementById('memName').value.trim();
   const phone=document.getElementById('memPhone').value.trim();
   const whatsapp=document.getElementById('memWhatsapp').value.trim();
   const patrol=document.getElementById('memPatrol').value.trim();
+  const nationalId=document.getElementById('memNationalId').value.trim();
+  const birthdate=document.getElementById('memBirthdate').value;
+  const rank=document.getElementById('memRank').value;
   const msgEl=document.getElementById('memMsg');
   if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم العضو ⚠️';return;}
-  const data={ name, phone, whatsapp: whatsapp||phone, gender: memGender, patrol };
+  if(nationalId && !/^\d{14}$/.test(nationalId)){msgEl.className='msg err';msgEl.textContent='الرقم القومي لازم يكون 14 رقم ⚠️';return;}
+  const data={ name, phone, whatsapp: whatsapp||phone, gender: memGender, patrol, badges: memSelectedBadges, nationalId, birthdate, rank };
+  if(pendingMemPhoto!==null) data.photoUrl=pendingMemPhoto;
   try{
     if(editingMemberId){
       await updateDoc(doc(db,'groups',currentGroupCode,'members',editingMemberId), data);
       msgEl.className='msg ok';msgEl.textContent='تم تعديل بيانات العضو ✅';
     }else{
+      data.photoUrl = pendingMemPhoto || '';
       data.createdAt=serverTimestamp();
       await addDoc(collection(db,'groups',currentGroupCode,'members'), data);
       msgEl.className='msg ok';msgEl.textContent='تمت إضافة العضو ✅';
@@ -822,12 +1140,22 @@ window.editMember=function(id){
   const m=members.find(x=>x.id===id);
   if(!m)return;
   editingMemberId=id;
+  pendingMemPhoto=null;
   document.getElementById('memName').value=m.name||'';
   document.getElementById('memPhone').value=m.phone||'';
   document.getElementById('memWhatsapp').value=m.whatsapp||'';
   document.getElementById('memPatrol').value=m.patrol||'';
+  document.getElementById('memNationalId').value=m.nationalId||'';
+  document.getElementById('memBirthdate').value=m.birthdate||'';
+  updateMemAgePreview();
   memGender=m.gender||'male';
+  memSelectedBadges=Array.isArray(m.badges)?[...m.badges]:[];
+  renderMemBadgePicker();
   document.querySelectorAll('#memGenderGrid .type-opt').forEach(o=>o.classList.toggle('sel', o.dataset.gender===memGender));
+  populateMemRankOptions(m.rank);
+  const prev=document.getElementById('memPhotoPreview');
+  if(m.photoUrl){prev.src=m.photoUrl;prev.style.display='block';}else{prev.style.display='none';}
+  document.getElementById('memPhotoInput').value='';
   document.getElementById('memFormTitle').textContent='✏️ تعديل بيانات العضو';
   document.getElementById('memSaveBtn').textContent='💾 حفظ التعديل';
   document.getElementById('memCancelBtn').style.display='block';
@@ -836,12 +1164,21 @@ window.editMember=function(id){
 
 window.resetMemberForm=function(){
   editingMemberId=null;
+  pendingMemPhoto=null;
   document.getElementById('memName').value='';
   document.getElementById('memPhone').value='';
   document.getElementById('memWhatsapp').value='';
   document.getElementById('memPatrol').value='';
+  document.getElementById('memNationalId').value='';
+  document.getElementById('memBirthdate').value='';
+  document.getElementById('memAgePreview').textContent='';
+  document.getElementById('memPhotoPreview').style.display='none';
+  document.getElementById('memPhotoInput').value='';
   memGender='male';
+  memSelectedBadges=[];
+  renderMemBadgePicker();
   document.querySelectorAll('#memGenderGrid .type-opt').forEach((o,i)=>o.classList.toggle('sel', i===0));
+  populateMemRankOptions();
   document.getElementById('memFormTitle').textContent='➕ إضافة عضو جديد';
   document.getElementById('memSaveBtn').textContent='✅ إضافة العضو';
   document.getElementById('memCancelBtn').style.display='none';
@@ -919,15 +1256,20 @@ window.addOrUpdateLeader=async function(){
   if(!editingLeaderId && !password){msgEl.className='msg err';msgEl.textContent='اكتب كلمة مرور ⚠️';return;}
   const data={ name, username, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
   if(password) data.password=password;
+  // Password-free copy for the public app — never include password/username here
+  const publicData={ name, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
   try{
+    let leaderId=editingLeaderId;
     if(editingLeaderId){
       await updateDoc(doc(db,'groups',currentGroupCode,'admins',editingLeaderId), data);
       msgEl.className='msg ok';msgEl.textContent='تم تعديل البيانات ✅';
     }else{
       data.createdAt=serverTimestamp();
-      await addDoc(collection(db,'groups',currentGroupCode,'admins'), data);
+      const ref=await addDoc(collection(db,'groups',currentGroupCode,'admins'), data);
+      leaderId=ref.id;
       msgEl.className='msg ok';msgEl.textContent='تمت الإضافة ✅';
     }
+    await setDoc(doc(db,'groups',currentGroupCode,'publicLeaders',leaderId), publicData);
     toast('تم الحفظ ✅');
     resetLeaderForm();
   }catch(e){
@@ -972,6 +1314,7 @@ window.deleteLeader=async function(id){
   if(!confirm('حذف هذا الحساب؟'))return;
   try{
     await deleteDoc(doc(db,'groups',currentGroupCode,'admins',id));
+    await deleteDoc(doc(db,'groups',currentGroupCode,'publicLeaders',id)).catch(()=>{});
     toast('تم الحذف ✅');
   }catch(e){
     toast('حصل خطأ: '+e.message);
@@ -991,6 +1334,7 @@ function startTasksSubscription(){
   tasksUnsub=onSnapshot(col, snap=>{
     tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderTasksList();
+    renderStatsOverview();
   });
 }
 
@@ -1079,13 +1423,336 @@ window.delTask=async function(id){
 };
 // ===== END TASKS MODULE =====
 
+// ===== CHAT MODULE =====
+let chatMessages=[];
+let chatUnsub=null;
+let chatSending=false;
+
+function startChatSubscription(){
+  if(chatUnsub){chatUnsub();chatUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'chat');
+  const q=query(col, orderBy('createdAt','asc'));
+  chatUnsub=onSnapshot(q, snap=>{
+    chatMessages=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderChatList();
+  }, err=>{
+    // Fallback if an index on createdAt isn't ready yet — show unordered rather than break
+    if(String(err).includes('index')){
+      const col2=collection(db,'groups',currentGroupCode,'chat');
+      chatUnsub=onSnapshot(col2, snap=>{
+        chatMessages=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderChatList();
+      });
+    }
+  });
+}
+
+function renderChatList(){
+  const el=document.getElementById('chatList');
+  if(!el)return;
+  if(!chatMessages.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد رسائل بعد</div>';
+    return;
+  }
+  const wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  el.innerHTML=chatMessages.map(m=>{
+    const isMine = currentAdmin && m.senderId===currentAdmin.id;
+    const time = m.createdAt?.seconds ? new Date(m.createdAt.seconds*1000).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}) : '';
+    return `<div class="chat-bubble ${isMine?'mine':'other'}">
+      ${isMine?'':`<div class="sender">${esc(m.senderName)}</div>`}
+      <div>${esc(m.text)}</div>
+      <div class="time">${time}</div>
+    </div>`;
+  }).join('');
+  if(wasAtBottom) el.scrollTop = el.scrollHeight;
+}
+
+window.sendChatMessage=async function(){
+  if(!currentGroupCode||!currentAdmin||chatSending)return;
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  const msgEl=document.getElementById('chatMsg');
+  if(!text)return;
+  chatSending=true;
+  const sendBtn=document.getElementById('chatSendBtn');
+  if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='...';}
+  try{
+    await addDoc(collection(db,'groups',currentGroupCode,'chat'),{
+      text: text.slice(0,500),
+      senderId: currentAdmin.id,
+      senderName: currentAdmin.name,
+      senderRole: currentAdmin.role,
+      createdAt: serverTimestamp()
+    });
+    input.value='';
+    msgEl.textContent='';
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='تعذّر الإرسال: '+e.message;
+  }finally{
+    chatSending=false;
+    if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='إرسال';}
+  }
+};
+
+// Hard permission check at the function level — a hidden button alone isn't
+// enough protection (a lesson learned: CSS/display:none can be bypassed).
+window.clearGroupChat=async function(){
+  if(!currentAdmin || currentAdmin.role!=='super'){
+    toast('غير مسموح لك بمسح الشات ⚠️');
+    return;
+  }
+  if(!confirm('مسح كل رسائل الشات؟ لا يمكن التراجع.'))return;
+  try{
+    const snap=await getDocs(collection(db,'groups',currentGroupCode,'chat'));
+    await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
+    toast('تم مسح الشات ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+// ===== END CHAT MODULE =====
+
+// ===== ANNOUNCEMENTS MODULE =====
+let anns=[];
+let annUnsub=null;
+let editingAnnId=null;
+let pendingAnnImg=null; // null=no change/none, string=new image
+
+function startAnnSubscription(){
+  if(annUnsub){annUnsub();annUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'announcements');
+  annUnsub=onSnapshot(col, snap=>{
+    anns=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAnnList();
+  });
+}
+
+window.handleAnnImagePick=async function(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  try{
+    const dataUrl=await resizeImageToDataUrl(file,480);
+    pendingAnnImg=dataUrl;
+    const prev=document.getElementById('annImgPreview');
+    prev.src=dataUrl;prev.style.display='block';
+  }catch(e){
+    toast('تعذّر معالجة الصورة ⚠️');
+  }
+};
+
+function renderAnnList(){
+  const el=document.getElementById('annList');
+  const countEl=document.getElementById('annCount');
+  if(!el)return;
+  countEl.textContent=anns.length;
+  const canManage = currentAdmin && currentAdmin.role!=='patrol';
+  if(!anns.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد إعلانات بعد</div>';
+    return;
+  }
+  const sorted=[...anns].sort((a,b)=>{
+    if(!!b.pinned!==!!a.pinned) return (b.pinned?1:0)-(a.pinned?1:0);
+    return (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0);
+  });
+  el.innerHTML=sorted.map(a=>{
+    const img=a.imageUrl?`<img src="${a.imageUrl}" style="width:100%;border-radius:10px;margin:8px 0;max-height:180px;object-fit:cover">`:'';
+    const pin=a.pinned?'<span style="font-size:0.7rem;color:var(--accent)">📌 مثبّت</span>':'';
+    const date=a.createdAt?.seconds?new Date(a.createdAt.seconds*1000).toLocaleDateString('ar-EG'):'';
+    return `<div style="padding:12px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:10px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="font-weight:700;color:var(--text);font-size:0.86rem">${esc(a.title)}</div>
+        ${pin}
+      </div>
+      ${img}
+      ${a.body?`<div style="color:var(--muted);font-size:0.78rem;margin-top:4px;line-height:1.6">${esc(a.body)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div style="font-size:0.68rem;color:var(--muted)">${date}${a.authorName?` · ${esc(a.authorName)}`:''}</div>
+        ${canManage?`<div style="display:flex;gap:8px">
+          <button onclick="editAnn('${a.id}')" style="background:none;border:none;color:var(--sky);cursor:pointer;font-size:0.75rem">✏️ تعديل</button>
+          <button onclick="deleteAnn('${a.id}')" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:0.75rem">🗑️ حذف</button>
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.addOrUpdateAnn=async function(){
+  if(!currentGroupCode || currentAdmin.role==='patrol')return;
+  const title=document.getElementById('annTitle').value.trim();
+  const body=document.getElementById('annBody').value.trim();
+  const pinned=document.getElementById('annPinned').checked;
+  const msgEl=document.getElementById('annMsg');
+  if(!title){msgEl.className='msg err';msgEl.textContent='اكتب عنوان الإعلان ⚠️';return;}
+  try{
+    const data={ title, body, pinned };
+    if(pendingAnnImg!==null) data.imageUrl=pendingAnnImg;
+    if(editingAnnId){
+      await updateDoc(doc(db,'groups',currentGroupCode,'announcements',editingAnnId), data);
+      msgEl.className='msg ok';msgEl.textContent='تم تعديل الإعلان ✅';
+    }else{
+      data.imageUrl = pendingAnnImg || '';
+      data.authorName=currentAdmin.name;
+      data.authorId=currentAdmin.id;
+      data.createdAt=serverTimestamp();
+      await addDoc(collection(db,'groups',currentGroupCode,'announcements'), data);
+      msgEl.className='msg ok';msgEl.textContent='تم نشر الإعلان ✅';
+    }
+    toast('تم الحفظ ✅');
+    resetAnnForm();
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.editAnn=function(id){
+  const a=anns.find(x=>x.id===id);
+  if(!a)return;
+  editingAnnId=id;
+  pendingAnnImg=null;
+  document.getElementById('annTitle').value=a.title||'';
+  document.getElementById('annBody').value=a.body||'';
+  document.getElementById('annPinned').checked=!!a.pinned;
+  const prev=document.getElementById('annImgPreview');
+  if(a.imageUrl){prev.src=a.imageUrl;prev.style.display='block';}else{prev.style.display='none';}
+  document.getElementById('annFormTitle').textContent='✏️ تعديل الإعلان';
+  document.getElementById('annSaveBtn').textContent='💾 حفظ التعديل';
+  document.getElementById('annCancelBtn').style.display='block';
+  document.getElementById('tab-ann').scrollIntoView({behavior:'smooth'});
+};
+
+window.resetAnnForm=function(){
+  editingAnnId=null;
+  pendingAnnImg=null;
+  document.getElementById('annTitle').value='';
+  document.getElementById('annBody').value='';
+  document.getElementById('annPinned').checked=false;
+  document.getElementById('annImgPreview').style.display='none';
+  document.getElementById('annImgInput').value='';
+  document.getElementById('annFormTitle').textContent='➕ إعلان جديد';
+  document.getElementById('annSaveBtn').textContent='✅ نشر الإعلان';
+  document.getElementById('annCancelBtn').style.display='none';
+  document.getElementById('annMsg').textContent='';
+};
+
+window.deleteAnn=async function(id){
+  if(!currentAdmin || currentAdmin.role==='patrol'){toast('غير مسموح لك بحذف الإعلانات ⚠️');return;}
+  if(!confirm('حذف هذا الإعلان؟'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'announcements',id));
+    toast('تم الحذف ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+// ===== END ANNOUNCEMENTS MODULE =====
+
+// ===== ATTENDANCE & STATS MODULE =====
+let attendanceRecords=[];
+let attUnsub=null;
+
+function startAttendanceSubscription(){
+  if(attUnsub){attUnsub();attUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'attendance');
+  attUnsub=onSnapshot(col, snap=>{
+    attendanceRecords=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAttList();
+    renderStatsOverview();
+  });
+}
+
+function renderAttMemberPicker(){
+  const el=document.getElementById('attMemberPicker');
+  if(!el)return;
+  if(!members.length){el.innerHTML='<div style="padding:10px;color:var(--muted);font-size:0.78rem">أضف أعضاء أولاً</div>';return;}
+  el.innerHTML=members.map(m=>
+    `<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" value="${m.id}" class="att-check" style="width:16px;height:16px">
+      <span style="font-size:0.8rem;color:var(--text)">${esc(m.name)}</span>
+    </label>`
+  ).join('');
+}
+
+window.saveAttendance=async function(){
+  if(!currentGroupCode)return;
+  const date=document.getElementById('attDate').value;
+  const activityType=document.getElementById('attType').value;
+  const msgEl=document.getElementById('attMsg');
+  if(!date){msgEl.className='msg err';msgEl.textContent='اختار التاريخ ⚠️';return;}
+  const presentIds=[...document.querySelectorAll('.att-check:checked')].map(c=>c.value);
+  if(!presentIds.length){msgEl.className='msg err';msgEl.textContent='حدد الحاضرين ⚠️';return;}
+  try{
+    await addDoc(collection(db,'groups',currentGroupCode,'attendance'),{
+      date, activityType, presentIds, recordedBy: currentAdmin.name, createdAt: serverTimestamp()
+    });
+    msgEl.className='msg ok';msgEl.textContent='تم حفظ الحضور ✅';
+    toast('تم حفظ الحضور ✅');
+    document.querySelectorAll('.att-check').forEach(c=>c.checked=false);
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }
+};
+
+window.deleteAttendance=async function(id){
+  if(!confirm('حذف سجل الحضور ده؟'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'attendance',id));
+    toast('تم الحذف ✅');
+  }catch(e){toast('حصل خطأ: '+e.message);}
+};
+
+function renderAttList(){
+  const el=document.getElementById('attList');
+  const countEl=document.getElementById('attCount');
+  if(!el)return;
+  countEl.textContent=attendanceRecords.length;
+  if(!attendanceRecords.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد سجلات حضور بعد</div>';
+    return;
+  }
+  const canManage = currentAdmin && currentAdmin.role!=='patrol';
+  const sorted=[...attendanceRecords].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  el.innerHTML=sorted.map(r=>{
+    return `<div style="padding:10px;background:rgba(0,0,0,0.18);border-radius:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)">
+      <div>
+        <div style="font-size:0.82rem;font-weight:700;color:var(--text)">${esc(r.date)} · ${esc(r.activityType||'')}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">👥 ${r.presentIds?r.presentIds.length:0} حاضر${r.recordedBy?` · سجّله ${esc(r.recordedBy)}`:''}</div>
+      </div>
+      ${canManage?`<button class="icon-btn" onclick="deleteAttendance('${r.id}')" title="حذف">🗑️</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderStatsOverview(){
+  const el=document.getElementById('statsOverview');
+  if(!el)return;
+  const total=members.length;
+  const males=members.filter(m=>m.gender==='male').length;
+  const females=total-males;
+  const doneTasks=tasks.filter(t=>t.status==='done').length;
+  const totalTasks=tasks.length;
+  let attendanceRate=0;
+  if(attendanceRecords.length && total){
+    const sumRates=attendanceRecords.reduce((s,r)=>s+((r.presentIds?r.presentIds.length:0)/total),0);
+    attendanceRate=Math.round((sumRates/attendanceRecords.length)*100);
+  }
+  el.innerHTML=`
+    <div class="stat-box"><div class="num">${total}</div><div class="lbl">👥 إجمالي الأعضاء</div></div>
+    <div class="stat-box"><div class="num">${males} / ${females}</div><div class="lbl">👦 ذكور / 👧 إناث</div></div>
+    <div class="stat-box"><div class="num">${totalTasks?`${doneTasks}/${totalTasks}`:'0'}</div><div class="lbl">✅ مهام منتهية</div></div>
+    <div class="stat-box"><div class="num">${attendanceRate}%</div><div class="lbl">📊 معدل الحضور</div></div>
+  `;
+}
+// ===== END ATTENDANCE & STATS MODULE =====
+
 window.saveGroupSettings=async function(){
   if(!currentGroupCode)return;
   const name=document.getElementById('setGroupName').value.trim();
   const msgEl=document.getElementById('setMsg');
   if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم المجموعة ⚠️';return;}
   try{
-    const updateData={ name, accentColor: setSelColor };
+    const publicMembersEnabled=document.getElementById('setPublicMembers').checked;
+    const featuredVideoUrl=document.getElementById('setVideoUrl').value.trim();
+    const updateData={ name, accentColor: setSelColor, publicMembersEnabled, featuredVideoUrl };
     if(pendingLogoDataUrl!==null) updateData.logoUrl = pendingLogoDataUrl;
     await updateDoc(doc(db,'groups',currentGroupCode), updateData);
     document.getElementById('ghGroupName').textContent=name;
@@ -1101,6 +1768,236 @@ window.saveGroupSettings=async function(){
     msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
   }
 };
+
+// ===== PUBLIC DIRECTORY MODULE (no login required) =====
+let dirGroups=[];
+let dirTypeFilter='الكل';
+let pubMembers=[];
+
+window.openDirectory=async function(){
+  showScreen('directory');
+  applyAccent(PALETTE[0]);
+  const listEl=document.getElementById('dirList');
+  listEl.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">جاري التحميل...</div>';
+  try{
+    const snap=await getDocs(collection(db,'groups'));
+    dirGroups=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderDirectory();
+  }catch(e){
+    listEl.innerHTML=`<div style="padding:16px;text-align:center;color:#e57373;font-size:0.8rem">تعذّر تحميل المجموعات: ${e.message}</div>`;
+  }
+};
+
+window.filterDirectory=function(btn){
+  dirTypeFilter=btn.dataset.type;
+  document.querySelectorAll('#dirTypeTabs .tab-btn').forEach(b=>b.classList.toggle('sel', b===btn));
+  renderDirectory();
+};
+
+function renderDirectory(){
+  const el=document.getElementById('dirList');
+  if(!el)return;
+  const q=(document.getElementById('dirSearch').value||'').trim().toLowerCase();
+  const filtered=dirGroups.filter(g=>
+    (dirTypeFilter==='الكل' || g.type===dirTypeFilter) &&
+    (!q || (g.name||'').toLowerCase().includes(q))
+  );
+  if(!filtered.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد مجموعات مطابقة</div>';
+    return;
+  }
+  const typeEmoji={'بحرية':'⚓','جوية':'✈️','فتيان':'🏕️','مرشدات':'🌸'};
+  el.innerHTML=filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar')).map(g=>{
+    const logo=g.logoUrl?`<img src="${g.logoUrl}" style="width:44px;height:44px;border-radius:10px;object-fit:cover">`:`<div style="width:44px;height:44px;border-radius:10px;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.3rem">${typeEmoji[g.type]||'🧭'}</div>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:8px;border:1px solid var(--border)">
+      ${logo}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--text)">${esc(g.name)}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${typeEmoji[g.type]||''} ${esc(g.type||'')}</div>
+      </div>
+      <button class="btn-link" onclick="viewPublicMembers('${g.id}')" style="white-space:nowrap">👥 الأعضاء</button>
+    </div>`;
+  }).join('');
+}
+
+let pubAnns=[];
+let pubTasks=[];
+let pubLeaders=[];
+let pubAttendance=[];
+
+window.switchPubTab=function(btn){
+  const tab=btn.dataset.ptab;
+  document.querySelectorAll('#pubTabBar .tab-btn').forEach(b=>b.classList.toggle('sel', b===btn));
+  document.querySelectorAll('#scr-public-members .tab-panel').forEach(p=>p.classList.toggle('hidden', p.id!=='ptab-'+tab));
+};
+
+function youtubeEmbedUrl(url){
+  if(!url)return null;
+  let id=null;
+  const m1=url.match(/[?&]v=([^&]+)/);
+  const m2=url.match(/youtu\.be\/([^?&]+)/);
+  const m3=url.match(/youtube\.com\/embed\/([^?&]+)/);
+  if(m1) id=m1[1]; else if(m2) id=m2[1]; else if(m3) id=m3[1];
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+
+window.viewPublicMembers=async function(groupCode){
+  try{
+    const groupSnap=await getDoc(doc(db,'groups',groupCode));
+    if(!groupSnap.exists()){toast('المجموعة غير موجودة ❌');return;}
+    const g=groupSnap.data();
+    if(!g.publicMembersEnabled){
+      toast('هذه المجموعة لم تفعّل التطبيق العام 🔒');
+      return;
+    }
+    const heroImg=document.getElementById('pubLogoImg');
+    const heroFallback=document.getElementById('pubLogoFallback');
+    if(g.logoUrl){heroImg.src=g.logoUrl;heroImg.style.display='block';heroFallback.style.display='none';}
+    else{heroImg.style.display='none';heroFallback.style.display='flex';}
+    document.getElementById('pubGroupName').textContent=g.name;
+    applyAccent(g.accentColor||PALETTE[0]);
+
+    const [membersSnap, annSnap, taskSnap, ldrSnap, attSnap]=await Promise.all([
+      getDocs(collection(db,'groups',groupCode,'members')),
+      getDocs(collection(db,'groups',groupCode,'announcements')),
+      getDocs(collection(db,'groups',groupCode,'tasks')),
+      getDocs(collection(db,'groups',groupCode,'publicLeaders')),
+      getDocs(collection(db,'groups',groupCode,'attendance'))
+    ]);
+    pubMembers=membersSnap.docs.map(d=>({id:d.id,...d.data()}));
+    pubAnns=annSnap.docs.map(d=>({id:d.id,...d.data()}));
+    pubTasks=taskSnap.docs.map(d=>({id:d.id,...d.data()}));
+    pubLeaders=ldrSnap.docs.map(d=>({id:d.id,...d.data()}));
+    pubAttendance=attSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+    document.getElementById('pubMemSearch').value='';
+    renderPublicMembers();
+    renderPubAnn();
+    renderPubVideo(g.featuredVideoUrl);
+    renderPubTasks();
+    renderPubLeaders();
+    renderPubRank();
+    document.querySelectorAll('#pubTabBar .tab-btn').forEach((b,i)=>b.classList.toggle('sel', i===0));
+    document.querySelectorAll('#scr-public-members .tab-panel').forEach((p,i)=>p.classList.toggle('hidden', i!==0));
+    showScreen('public-members');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+
+function renderPubAnn(){
+  const el=document.getElementById('pubAnnList');
+  if(!el)return;
+  if(!pubAnns.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد إعلانات بعد</div>';return;}
+  const sorted=[...pubAnns].sort((a,b)=>{
+    if(!!b.pinned!==!!a.pinned) return (b.pinned?1:0)-(a.pinned?1:0);
+    return (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0);
+  });
+  el.innerHTML=sorted.map(a=>{
+    const img=a.imageUrl?`<img src="${a.imageUrl}" style="width:100%;border-radius:10px;margin:8px 0;max-height:180px;object-fit:cover">`:'';
+    const pin=a.pinned?'<span style="font-size:0.7rem;color:var(--accent)">📌 مثبّت</span>':'';
+    const date=a.createdAt?.seconds?new Date(a.createdAt.seconds*1000).toLocaleDateString('ar-EG'):'';
+    return `<div style="padding:12px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:10px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="font-weight:700;color:var(--text);font-size:0.86rem">${esc(a.title)}</div>${pin}
+      </div>
+      ${img}
+      ${a.body?`<div style="color:var(--muted);font-size:0.78rem;margin-top:4px;line-height:1.6">${esc(a.body)}</div>`:''}
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:8px">${date}${a.authorName?` · ${esc(a.authorName)}`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPubVideo(url){
+  const el=document.getElementById('pubVideoBox');
+  if(!el)return;
+  const embed=youtubeEmbedUrl(url);
+  if(!embed){el.innerHTML='<div style="text-align:center;color:var(--muted);font-size:0.82rem;padding:20px 0">لا يوجد فيديو مميز بعد</div>';return;}
+  el.innerHTML=`<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden"><iframe src="${embed}" style="position:absolute;top:0;right:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div>`;
+}
+
+function renderPubTasks(){
+  const el=document.getElementById('pubTaskList');
+  if(!el)return;
+  if(!pubTasks.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد مهام بعد</div>';return;}
+  el.innerHTML=pubTasks.map(t=>{
+    const status=STATUS_LABELS[t.status||'pending'];
+    const patrolTag=t.patrol?` <span style="font-size:0.68rem;color:var(--sky)">· طليعة ${esc(t.patrol)}</span>`:'';
+    return `<div style="padding:10px;background:rgba(0,0,0,0.18);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;font-size:0.82rem;color:var(--text)">${esc(t.title)}${patrolTag}</div>
+        <span style="font-size:0.68rem;color:var(--muted)">${status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPubLeaders(){
+  const el=document.getElementById('pubLeaderList');
+  if(!el)return;
+  if(!pubLeaders.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد قادة بعد</div>';return;}
+  el.innerHTML=pubLeaders.map(l=>{
+    const roleLabel = l.role==='leader' ? '🧑‍✈️ قائد' : `🎖️ عريف${l.patrol?` · طليعة ${esc(l.patrol)}`:''}`;
+    return `<div class="mem-row"><div class="mem-avatar">${l.role==='leader'?'🧑‍✈️':'🎖️'}</div>
+      <div class="mem-info"><div class="name">${esc(l.name)}</div><div class="meta">${roleLabel}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderPubRank(){
+  const el=document.getElementById('pubRankList');
+  if(!el)return;
+  if(!pubMembers.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد أعضاء بعد</div>';return;}
+  const scored=pubMembers.map(m=>{
+    const attCount=pubAttendance.filter(r=>(r.presentIds||[]).includes(m.id)).length;
+    const badgeCount=(m.badges||[]).length;
+    const taskCount=pubTasks.filter(t=>t.status==='done' && t.patrol && m.patrol && t.patrol===m.patrol).length;
+    return { m, attCount, badgeCount, taskCount, total: attCount+badgeCount+taskCount };
+  }).sort((a,b)=>b.total-a.total);
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=scored.map((s,i)=>{
+    const icon=s.m.gender==='female'?'👧':'👦';
+    const avatar=s.m.photoUrl?`<img src="${s.m.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:icon;
+    return `<div class="mem-row">
+      <div style="width:24px;text-align:center;font-weight:800;color:var(--accent)">${medals[i]||(i+1)}</div>
+      <div class="mem-avatar">${avatar}</div>
+      <div class="mem-info">
+        <div class="name">${esc(s.m.name)}</div>
+        <div class="meta">📅 ${s.attCount} · 🏅 ${s.badgeCount} · ✅ ${s.taskCount} = <b>${s.total}</b></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPublicMembers(){
+  const el=document.getElementById('pubMemList');
+  if(!el)return;
+  const q=(document.getElementById('pubMemSearch').value||'').trim().toLowerCase();
+  const filtered=pubMembers.filter(m=>!q || (m.name||'').toLowerCase().includes(q));
+  if(!filtered.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد أعضاء بعد</div>';
+    return;
+  }
+  el.innerHTML=filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar')).map(m=>{
+    const icon=m.gender==='female'?'👧':'👦';
+    const avatar=m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:icon;
+    const patrol=m.patrol?` · طليعة ${esc(m.patrol)}`:'';
+    const rankTxt=m.rank?` · ${esc(m.rank)}`:'';
+    const badgesHtml=(m.badges&&m.badges.length)?`<div class="mem-badges">${m.badges.map(bId=>{
+      const b=BADGE_PRESETS.find(x=>x.id===bId);
+      return b?`<span title="${esc(b.label)}">${b.emoji}</span>`:'';
+    }).join('')}</div>`:'';
+    return `<div class="mem-row">
+      <div class="mem-avatar">${avatar}</div>
+      <div class="mem-info">
+        <div class="name">${esc(m.name)}${rankTxt}</div>
+        <div class="meta">${patrol||'بدون طليعة'}</div>
+        ${badgesHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+// ===== END PUBLIC DIRECTORY MODULE =====
 
 // Service worker
 if('serviceWorker' in navigator){
