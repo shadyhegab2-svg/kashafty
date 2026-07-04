@@ -391,7 +391,7 @@
       <div class="card">
         <h2 id="memFormTitle">➕ إضافة عضو جديد</h2>
         <div class="field">
-          <label>صورة العضو (اختياري)</label>
+          <label>صورة العضو/ه (اختياري)</label>
           <div style="display:flex;align-items:center;gap:10px">
             <img id="memPhotoPreview" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
             <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
@@ -405,7 +405,7 @@
           <input id="memName" placeholder="اسم العضو بالكامل">
         </div>
         <div class="field">
-          <label>الرقم القومي (اختياري)</label>
+          <label>الرقم القومي د</label>
           <input id="memNationalId" placeholder="14 رقم" maxlength="14" dir="ltr">
         </div>
         <div class="field">
@@ -417,7 +417,7 @@
           <input id="memWhatsapp" placeholder="اختياري" dir="ltr">
         </div>
         <div class="field">
-          <label>تاريخ الميلاد (اختياري)</label>
+          <label>تاريخ الميلاد </label>
           <input id="memBirthdate" type="date" onchange="updateMemAgePreview()">
           <div id="memAgePreview" style="font-size:0.72rem;color:var(--accent);margin-top:4px"></div>
         </div>
@@ -433,11 +433,11 @@
           <select id="memRank" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem"></select>
         </div>
         <div class="field">
-          <label>الطليعة / الفرقة (اختياري)</label>
+          <label>الطليعة / الفرقة </label>
           <input id="memPatrol" placeholder="مثال: طليعة الصقور">
         </div>
         <div class="field">
-          <label>الأوسمة (اختياري)</label>
+          <label>الأوسمة </label>
           <div id="memBadgePicker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <button class="btn btn-primary" onclick="addOrUpdateMember()" id="memSaveBtn">✅ إضافة العضو</button>
@@ -461,15 +461,15 @@
           <input id="taskTitle" placeholder="مثال: تحضير مخيم نهاية الأسبوع">
         </div>
         <div class="field">
-          <label>التفاصيل (اختياري)</label>
+          <label>التفاصيل </label>
           <input id="taskDesc" placeholder="تفاصيل إضافية">
         </div>
         <div class="field">
-          <label>تاريخ الاستحقاق (اختياري)</label>
+          <label>تاريخ التنفيذ </label>
           <input id="taskDue" type="date">
         </div>
         <div class="field">
-          <label>المسؤول (اختياري)</label>
+          <label>المسؤول </label>
           <input id="taskOwner" placeholder="اسم المسؤول عن التنفيذ">
         </div>
         <button class="btn btn-primary" onclick="addTask()">✅ إضافة المهمة</button>
@@ -511,7 +511,7 @@
           <input id="annBody" placeholder="تفاصيل الإعلان">
         </div>
         <div class="field">
-          <label>صورة (اختياري)</label>
+          <label>صورة </label>
           <div style="display:flex;align-items:center;gap:10px">
             <img id="annImgPreview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;background:rgba(0,0,0,0.25);display:none">
             <label style="flex:1;padding:10px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.76rem;color:var(--muted)">
@@ -550,14 +550,14 @@
         <div class="field">
           <label>نوع النشاط</label>
           <select id="attType" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem">
-            <option value="اجتماع">اجتماع عادي</option>
+            <option value="اجتماع">اجتماع دوري</option>
             <option value="رحلة">رحلة</option>
             <option value="مخيم">مخيم</option>
             <option value="تدريب">تدريب</option>
           </select>
         </div>
         <div class="field">
-          <label>الحاضرون</label>
+          <label>الحضور</label>
           <div id="attMemberPicker" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:6px"></div>
         </div>
         <button class="btn btn-primary" onclick="saveAttendance()">✅ حفظ الحضور</button>
@@ -666,7 +666,7 @@
     </div>
 
     <div class="card">
-      <h2>🚧 قريبًا</h2>
+      <h2>🚧 قريبا</h2>
       <p style="color:var(--muted);font-size:0.82rem;line-height:1.8">
         باقي وحدات النظام (المهام، الشات، الإعلانات، الحضور والتقييمات)
         هيتم بناؤها في المراحل الجاية بنفس منطق العزل بتاع المجموعة اللي شغال دلوقتي.
@@ -678,7 +678,7 @@
   <footer>
     كشافتي © 2026 — جميع الحقوق محفوظة<br>
     تطوير وإدارة: <b>شادي محمد حجاب</b><br>
-    📱 <a href="tel:+201006857145">+20 100 685 7145</a> &nbsp;|&nbsp;
+    📱 <a href="tel:+201006857145">+201006857145</a> &nbsp;|&nbsp;
     ✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a>
   </footer>
 </div>
@@ -1079,7 +1079,7 @@ function renderMembersList(){
 }
 
 const BADGE_PRESETS=[
-  {id:'leader',emoji:'🏅',label:'القائد المثالي'},
+  {id:'leader',emoji:'🏅',label:'العريف المثالي'},
   {id:'committed',emoji:'🎯',label:'الأكثر التزامًا'},
   {id:'team',emoji:'🤝',label:'روح الفريق'},
   {id:'energetic',emoji:'🔥',label:'الأكثر حماسًا'},
