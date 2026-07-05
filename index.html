@@ -296,18 +296,9 @@
         <input id="regPassword" type="password" placeholder="اختر كلمة مرور قوية">
       </div>
 
-      <button class="btn btn-primary" onclick="registerGroup()">✅ إنشاء المجموعة</button>
+      <button class="btn btn-primary" onclick="registerGroup()" id="regSaveBtn">✅ إنشاء المجموعة</button>
       <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showScreen('home')">رجوع</button>
       <div id="regMsg" class="msg"></div>
-    </div>
-
-    <div id="regSuccess" class="card hidden">
-      <div class="success-box">
-        <div>🎉 تم إنشاء مجموعتك بنجاح!</div>
-        <div>ده كود مجموعتك — احتفظ بيه، هتحتاجه لتسجيل الدخول:</div>
-        <div class="code" id="newGroupCode"></div>
-        <button class="btn btn-primary" onclick="showScreen('login')">تسجيل الدخول الآن</button>
-      </div>
     </div>
   </div>
 
@@ -323,7 +314,7 @@
         <label>كلمة المرور</label>
         <input id="loginPass" type="password">
       </div>
-      <button class="btn btn-primary" onclick="loginGroup()">دخول</button>
+      <button class="btn btn-primary" onclick="loginGroup()" id="loginSaveBtn">دخول</button>
       <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showRecovery()">نسيت كلمة المرور؟</button>
       <button class="btn-link" style="display:block;text-align:center;margin-top:8px" onclick="showScreen('home')">رجوع</button>
       <div id="loginMsg" class="msg"></div>
@@ -547,7 +538,7 @@
           <label>الحاضرون</label>
           <div id="attMemberPicker" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:6px"></div>
         </div>
-        <button class="btn btn-primary" onclick="saveAttendance()">✅ حفظ الحضور</button>
+        <button class="btn btn-primary" onclick="saveAttendance()" id="attSaveBtn">✅ حفظ الحضور</button>
         <div id="attMsg" class="msg"></div>
       </div>
 
@@ -754,7 +745,6 @@ window.showScreen=function(name){
   ['home','register','login','directory','public-members'].forEach(s=>{
     document.getElementById('scr-'+s).classList.toggle('hidden', s!==name);
   });
-  document.getElementById('regSuccess').classList.add('hidden');
   document.getElementById('regMsg').textContent='';
   document.getElementById('loginMsg').textContent='';
   document.getElementById('recoveryCard').classList.add('hidden');
@@ -837,7 +827,9 @@ function slugify(name){
 }
 
 // ===== REGISTER =====
+let registeringInProgress=false;
 window.registerGroup=async function(){
+  if(registeringInProgress)return;
   const name=document.getElementById('regGroupName').value.trim();
   const type=document.querySelector('#typeGrid .type-opt.sel')?.dataset.type||'فتيان';
   const ownerName=document.getElementById('regOwnerName').value.trim();
@@ -851,32 +843,42 @@ window.registerGroup=async function(){
     msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة (البريد الإلكتروني إلزامي دلوقتي) ⚠️';return;
   }
   const groupCode = slugify(name)+'-'+Math.floor(1000+Math.random()*9000);
+  const btn=document.getElementById('regSaveBtn');
 
+  registeringInProgress=true;
+  if(btn){btn.disabled=true;btn.textContent='⏳ جاري الإنشاء...';}
   try{
     const cred=await createUserWithEmailAndPassword(auth, ownerEmail, password);
     const uid=cred.user.uid;
-    await setDoc(doc(db,'groups',groupCode),{
+    const groupData={
       name, type, ownerName, ownerPhone, ownerEmail,
       accentColor: selColor, logoUrl:'', publicMembersEnabled:false, featuredVideoUrl:'', createdAt: serverTimestamp()
-    });
+    };
+    await setDoc(doc(db,'groups',groupCode), groupData);
     await setDoc(doc(db,'groups',groupCode,'admins',uid),{
       name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super', createdAt: serverTimestamp()
     });
     await setDoc(doc(db,'adminIndex',uid),{ groupId: groupCode, role:'super' });
-    document.getElementById('newGroupCode').textContent=groupCode;
-    document.getElementById('regSuccess').classList.remove('hidden');
-    toast('تم إنشاء المجموعة بنجاح ✅');
+    toast(`تم إنشاء المجموعة بنجاح ✅ — كود مجموعتك: ${groupCode}`);
+    currentGroupCode=groupCode;
+    currentAdmin={ id:uid, name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super' };
+    enterApp(groupData);
   }catch(e){
     const msg = e.code==='auth/email-already-in-use' ? 'البريد الإلكتروني ده مسجّل بحساب تاني بالفعل ⚠️'
       : e.code==='auth/weak-password' ? 'كلمة المرور ضعيفة، اختار كلمة أقوى (6 حروف على الأقل) ⚠️'
       : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
       : 'حصل خطأ: '+e.message;
     msgEl.className='msg err';msgEl.textContent=msg;
+  }finally{
+    registeringInProgress=false;
+    if(btn){btn.disabled=false;btn.textContent='✅ إنشاء المجموعة';}
   }
 };
 
 // ===== LOGIN =====
+let loginInProgress=false;
 window.loginGroup=async function(){
+  if(loginInProgress)return;
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
   const msgEl=document.getElementById('loginMsg');
@@ -885,6 +887,9 @@ window.loginGroup=async function(){
   if(!email||!pass){
     msgEl.className='msg err';msgEl.textContent='املأ كل الحقول ⚠️';return;
   }
+  loginInProgress=true;
+  const btn=document.getElementById('loginSaveBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ جاري الدخول...';}
   try{
     const cred=await signInWithEmailAndPassword(auth, email, pass);
     const uid=cred.user.uid;
@@ -911,6 +916,9 @@ window.loginGroup=async function(){
       : e.code==='auth/too-many-requests' ? 'محاولات كتير غلط، جرب تاني بعد شوية ⏳'
       : 'حصل خطأ: '+e.message;
     msgEl.className='msg err';msgEl.textContent=msg;
+  }finally{
+    loginInProgress=false;
+    if(btn){btn.disabled=false;btn.textContent='دخول';}
   }
 };
 
@@ -946,6 +954,7 @@ function enterApp(groupData){
   startAttendanceSubscription();
   renderMemBadgePicker();
   populateMemRankOptions();
+  const ldrTabBtn=document.getElementById('leadersTabBtn');
   if(currentAdmin.role==='super'){
     ldrTabBtn.style.display='inline-block';
     startLeadersSubscription();
@@ -1113,8 +1122,9 @@ window.toggleMemBadge=function(id){
   renderMemBadgePicker();
 };
 
+let memberSaveInProgress=false;
 window.addOrUpdateMember=async function(){
-  if(!currentGroupCode)return;
+  if(!currentGroupCode||memberSaveInProgress)return;
   const name=document.getElementById('memName').value.trim();
   const phone=document.getElementById('memPhone').value.trim();
   const whatsapp=document.getElementById('memWhatsapp').value.trim();
@@ -1127,6 +1137,9 @@ window.addOrUpdateMember=async function(){
   if(nationalId && !/^\d{14}$/.test(nationalId)){msgEl.className='msg err';msgEl.textContent='الرقم القومي لازم يكون 14 رقم ⚠️';return;}
   const data={ name, phone, whatsapp: whatsapp||phone, gender: memGender, patrol, badges: memSelectedBadges, nationalId, birthdate, rank };
   if(pendingMemPhoto!==null) data.photoUrl=pendingMemPhoto;
+  memberSaveInProgress=true;
+  const btn=document.getElementById('memSaveBtn');
+  if(btn) btn.disabled=true;
   try{
     if(editingMemberId){
       await updateDoc(doc(db,'groups',currentGroupCode,'members',editingMemberId), data);
@@ -1141,6 +1154,9 @@ window.addOrUpdateMember=async function(){
     resetMemberForm();
   }catch(e){
     msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }finally{
+    memberSaveInProgress=false;
+    if(btn) btn.disabled=false;
   }
 };
 
@@ -1268,8 +1284,9 @@ async function createLeaderAuthAccount(email, password){
   }
 }
 
+let leaderSaveInProgress=false;
 window.addOrUpdateLeader=async function(){
-  if(!currentGroupCode)return;
+  if(!currentGroupCode||leaderSaveInProgress)return;
   const name=document.getElementById('ldrName').value.trim();
   const email=document.getElementById('ldrEmail').value.trim();
   const username=document.getElementById('ldrUsername').value.trim();
@@ -1281,6 +1298,10 @@ window.addOrUpdateLeader=async function(){
   const data={ name, username, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
   // Password-free copy for the public app — never include password/email here
   const publicData={ name, role: ldrRole, patrol: ldrRole==='patrol'?patrol:'' };
+  leaderSaveInProgress=true;
+  const btn=document.getElementById('ldrSaveBtn');
+  const prevBtnText=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ جاري الحفظ...';}
   try{
     let leaderId=editingLeaderId;
     if(editingLeaderId){
@@ -1303,6 +1324,9 @@ window.addOrUpdateLeader=async function(){
       : e.code==='auth/invalid-email' ? 'البريد الإلكتروني غير صحيح ⚠️'
       : 'حصل خطأ: '+e.message;
     msgEl.className='msg err';msgEl.textContent=msg;
+  }finally{
+    leaderSaveInProgress=false;
+    if(btn){btn.disabled=false;btn.textContent=editingLeaderId?'💾 حفظ التعديل':prevBtnText||'✅ إضافة';}
   }
 };
 
@@ -1613,13 +1637,17 @@ function renderAnnList(){
   }).join('');
 }
 
+let annSaveInProgress=false;
 window.addOrUpdateAnn=async function(){
-  if(!currentGroupCode || currentAdmin.role==='patrol')return;
+  if(!currentGroupCode || currentAdmin.role==='patrol' || annSaveInProgress)return;
   const title=document.getElementById('annTitle').value.trim();
   const body=document.getElementById('annBody').value.trim();
   const pinned=document.getElementById('annPinned').checked;
   const msgEl=document.getElementById('annMsg');
   if(!title){msgEl.className='msg err';msgEl.textContent='اكتب عنوان الإعلان ⚠️';return;}
+  annSaveInProgress=true;
+  const btn=document.getElementById('annSaveBtn');
+  if(btn) btn.disabled=true;
   try{
     const data={ title, body, pinned };
     if(pendingAnnImg!==null) data.imageUrl=pendingAnnImg;
@@ -1638,6 +1666,9 @@ window.addOrUpdateAnn=async function(){
     resetAnnForm();
   }catch(e){
     msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }finally{
+    annSaveInProgress=false;
+    if(btn) btn.disabled=false;
   }
 };
 
@@ -1709,14 +1740,18 @@ function renderAttMemberPicker(){
   ).join('');
 }
 
+let attSaveInProgress=false;
 window.saveAttendance=async function(){
-  if(!currentGroupCode)return;
+  if(!currentGroupCode||attSaveInProgress)return;
   const date=document.getElementById('attDate').value;
   const activityType=document.getElementById('attType').value;
   const msgEl=document.getElementById('attMsg');
   if(!date){msgEl.className='msg err';msgEl.textContent='اختار التاريخ ⚠️';return;}
   const presentIds=[...document.querySelectorAll('.att-check:checked')].map(c=>c.value);
   if(!presentIds.length){msgEl.className='msg err';msgEl.textContent='حدد الحاضرين ⚠️';return;}
+  attSaveInProgress=true;
+  const btn=document.getElementById('attSaveBtn');
+  if(btn) btn.disabled=true;
   try{
     await addDoc(collection(db,'groups',currentGroupCode,'attendance'),{
       date, activityType, presentIds, recordedBy: currentAdmin.name, createdAt: serverTimestamp()
@@ -1726,6 +1761,9 @@ window.saveAttendance=async function(){
     document.querySelectorAll('.att-check').forEach(c=>c.checked=false);
   }catch(e){
     msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }finally{
+    attSaveInProgress=false;
+    if(btn) btn.disabled=false;
   }
 };
 
