@@ -627,7 +627,10 @@
 
     <div class="card">
       <h2>🔑 كود المجموعة</h2>
-      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px">شارك الكود ده مع قادة وعرفاء مجموعتك عشان يقدروا يسجّلوا دخول</p>
+      <p style="color:var(--muted);font-size:0.78rem;margin-bottom:10px">
+        الكود ده مش للدخول الإداري (القادة والعرفاء بيدخلوا بالإيميل وكلمة المرور بس).
+        استخدامه الوحيد: مشاركته مع أي حد عايز يفتح "التطبيق العام" لمجموعتك (لو فعّلته من تحت) من غير تسجيل دخول.
+      </p>
       <div style="display:flex;align-items:center;gap:8px">
         <div style="flex:1;background:rgba(0,0,0,0.25);border:1px solid var(--border2);border-radius:10px;padding:11px;font-weight:800;letter-spacing:1px;direction:ltr;text-align:center;color:var(--sky)" id="settingsGroupCode"></div>
         <button class="btn-link" onclick="copyGroupCode()">📋 نسخ</button>
@@ -859,7 +862,7 @@ window.registerGroup=async function(){
       name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super', createdAt: serverTimestamp()
     });
     await setDoc(doc(db,'adminIndex',uid),{ groupId: groupCode, role:'super' });
-    toast(`تم إنشاء المجموعة بنجاح ✅ — كود مجموعتك: ${groupCode}`);
+    toast(`تم إنشاء المجموعة ✅ — كود مجموعتك (للتطبيق العام لاحقًا): ${groupCode}`);
     currentGroupCode=groupCode;
     currentAdmin={ id:uid, name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super' };
     enterApp(groupData);
