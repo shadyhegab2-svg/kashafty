@@ -82,6 +82,12 @@
   .mem-badges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
   .mem-badges span{font-size:0.85rem}
 
+  .album-card{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer}
+  .album-cover{width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+  .photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--navy2)}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover}
+  .photo-thumb .del-photo{position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:0.7rem;cursor:pointer}
+
   .card{
     background:var(--card);
     border:1px solid var(--border);
@@ -214,6 +220,7 @@
     <div class="tab-bar" id="pubTabBar">
       <button class="tab-btn sel" data-ptab="ann" onclick="switchPubTab(this)">📢 إعلانات</button>
       <button class="tab-btn" data-ptab="video" onclick="switchPubTab(this)">📺 فيديو</button>
+      <button class="tab-btn" data-ptab="albums" onclick="switchPubTab(this)">🖼️ ألبومات</button>
       <button class="tab-btn" data-ptab="tasks" onclick="switchPubTab(this)">📋 مهام</button>
       <button class="tab-btn" data-ptab="leaders" onclick="switchPubTab(this)">🧑‍✈️ قادة</button>
       <button class="tab-btn" data-ptab="members" onclick="switchPubTab(this)">👥 أعضاء</button>
@@ -226,6 +233,17 @@
 
     <div id="ptab-video" class="tab-panel hidden">
       <div class="card"><div id="pubVideoBox" style="text-align:center;color:var(--muted);font-size:0.82rem;padding:20px 0">لا يوجد فيديو مميز بعد</div></div>
+    </div>
+
+    <div id="ptab-albums" class="tab-panel hidden">
+      <div class="card" id="pubAlbumListCard"><div id="pubAlbumList"></div></div>
+      <div class="card hidden" id="pubAlbumDetailCard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h2 id="pubAlbumDetailTitle" style="margin:0"></h2>
+          <button class="btn-link" onclick="closePubAlbumDetail()">✕ إغلاق</button>
+        </div>
+        <div id="pubAlbumPhotoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"></div>
+      </div>
     </div>
 
     <div id="ptab-tasks" class="tab-panel hidden">
@@ -360,6 +378,7 @@
       <button class="tab-btn" data-tab="chat" onclick="switchTab(this)">💬 الشات</button>
       <button class="tab-btn" data-tab="ann" onclick="switchTab(this)">📢 الإعلانات</button>
       <button class="tab-btn" data-tab="stats" onclick="switchTab(this)">📊 الحضور</button>
+      <button class="tab-btn" data-tab="albums" onclick="switchTab(this)">🖼️ الألبومات</button>
       <button class="tab-btn" data-tab="leaders" onclick="switchTab(this)" id="leadersTabBtn" style="display:none">🧑‍✈️ القادة</button>
       <button class="tab-btn" data-tab="settings" onclick="switchTab(this)">⚙️ الإعدادات</button>
     </div>
@@ -548,6 +567,40 @@
       </div>
     </div>
 
+    <!-- ===== TAB: ALBUMS ===== -->
+    <div id="tab-albums" class="tab-panel hidden">
+      <div class="card" id="albumFormCard">
+        <h2>➕ ألبوم جديد</h2>
+        <div class="field">
+          <label>اسم الألبوم</label>
+          <input id="albumName" placeholder="مثال: مخيم الصيف 2026">
+        </div>
+        <button class="btn btn-primary" onclick="createAlbum()" id="albumSaveBtn">✅ إنشاء الألبوم</button>
+        <div id="albumMsg" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 الألبومات (<span id="albumCount">0</span>)</h2>
+        <div id="albumList"></div>
+      </div>
+
+      <!-- Album detail (opens when a specific album is selected) -->
+      <div class="card hidden" id="albumDetailCard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h2 id="albumDetailTitle" style="margin:0"></h2>
+          <button class="btn-link" onclick="closeAlbumDetail()">✕ إغلاق</button>
+        </div>
+        <div id="albumUploadArea" style="margin-bottom:12px">
+          <label style="display:block;padding:11px;background:rgba(0,0,0,0.2);border:1px dashed var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:0.78rem;color:var(--muted)">
+            📎 رفع صور (تقدر تختار أكتر من صورة)
+            <input type="file" id="albumPhotoInput" accept="image/*" multiple onchange="handleAlbumUpload(this)" style="display:none">
+          </label>
+          <div id="albumUploadProgress" style="font-size:0.72rem;color:var(--muted);margin-top:6px"></div>
+        </div>
+        <div id="albumPhotoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"></div>
+      </div>
+    </div>
+
     <!-- ===== TAB: LEADERS (super admin only) ===== -->
     <div id="tab-leaders" class="tab-panel hidden">
       <div class="card">
@@ -696,6 +749,17 @@ const fb = initializeApp(firebaseConfig);
 const db = getFirestore(fb);
 const auth = getAuth(fb);
 const GROUPS = collection(db, 'groups');
+
+// ⚠️ استبدل دول بحساب Cloudinary مجاني خاص بكشافتي (نفس أسلوب أسد البحار — بدون Firebase Storage خالص، من غير أي تكلفة)
+const CLOUD='ivnfqqan', PRESET='ml_default';
+async function uploadToCloudinary(file){
+  const fd=new FormData();
+  fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('folder','kashafty');
+  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`,{method:'POST',body:fd});
+  const d=await r.json();
+  if(!d.secure_url) throw new Error(d.error?.message||'فشل رفع الصورة');
+  return d.secure_url;
+}
 
 // ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
 const PALETTE = ['#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
@@ -955,6 +1019,7 @@ function enterApp(groupData){
   startChatSubscription();
   startAnnSubscription();
   startAttendanceSubscription();
+  startAlbumsSubscription();
   renderMemBadgePicker();
   populateMemRankOptions();
   const ldrTabBtn=document.getElementById('leadersTabBtn');
@@ -970,6 +1035,8 @@ function enterApp(groupData){
   if(annFormCard) annFormCard.style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
   const attFormCard=document.getElementById('attFormCard');
   if(attFormCard) attFormCard.style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
+  const albumFormCard=document.getElementById('albumFormCard');
+  if(albumFormCard) albumFormCard.style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
 }
 
 window.switchTab=function(btn){
@@ -987,7 +1054,8 @@ window.doLogout=function(){
   if(chatUnsub){chatUnsub();chatUnsub=null;}
   if(annUnsub){annUnsub();annUnsub=null;}
   if(attUnsub){attUnsub();attUnsub=null;}
-  members=[];leaders=[];tasks=[];chatMessages=[];anns=[];attendanceRecords=[];
+  if(albumsUnsub){albumsUnsub();albumsUnsub=null;}
+  members=[];leaders=[];tasks=[];chatMessages=[];anns=[];attendanceRecords=[];albums=[];
   document.getElementById('app').style.display='none';
   applyAccent(PALETTE[0]);
   showScreen('home');
@@ -1822,6 +1890,157 @@ function renderStatsOverview(){
 }
 // ===== END ATTENDANCE & STATS MODULE =====
 
+// ===== ALBUMS MODULE (Firebase Storage) =====
+let albums=[];
+let albumsUnsub=null;
+let currentAlbumId=null;
+let albumSaveInProgress=false;
+
+function startAlbumsSubscription(){
+  if(albumsUnsub){albumsUnsub();albumsUnsub=null;}
+  const col=collection(db,'groups',currentGroupCode,'albums');
+  albumsUnsub=onSnapshot(col, snap=>{
+    albums=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderAlbumsList();
+    if(currentAlbumId) renderAlbumDetail();
+  });
+}
+
+function renderAlbumsList(){
+  const el=document.getElementById('albumList');
+  const countEl=document.getElementById('albumCount');
+  if(!el)return;
+  countEl.textContent=albums.length;
+  if(!albums.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد ألبومات بعد</div>';
+    return;
+  }
+  el.innerHTML=albums.map(a=>{
+    const photos=a.photos||[];
+    const cover=photos.length?`<img src="${photos[0].url}" class="album-cover">`:`<div class="album-cover">🖼️</div>`;
+    return `<div class="album-card" onclick="openAlbumDetail('${a.id}')">
+      ${cover}
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:0.85rem;color:var(--text)">${esc(a.name)}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${photos.length} صورة</div>
+      </div>
+      ${currentAdmin.role!=='patrol'?`<button class="icon-btn" onclick="event.stopPropagation();deleteAlbum('${a.id}')" title="حذف">🗑️</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+window.createAlbum=async function(){
+  if(!currentGroupCode||albumSaveInProgress||currentAdmin.role==='patrol')return;
+  const name=document.getElementById('albumName').value.trim();
+  const msgEl=document.getElementById('albumMsg');
+  if(!name){msgEl.className='msg err';msgEl.textContent='اكتب اسم الألبوم ⚠️';return;}
+  albumSaveInProgress=true;
+  const btn=document.getElementById('albumSaveBtn');
+  if(btn) btn.disabled=true;
+  try{
+    await addDoc(collection(db,'groups',currentGroupCode,'albums'),{
+      name, photos:[], authorName: currentAdmin.name, createdAt: serverTimestamp()
+    });
+    document.getElementById('albumName').value='';
+    msgEl.className='msg ok';msgEl.textContent='تم إنشاء الألبوم ✅';
+    toast('تم إنشاء الألبوم ✅');
+  }catch(e){
+    msgEl.className='msg err';msgEl.textContent='حصل خطأ: '+e.message;
+  }finally{
+    albumSaveInProgress=false;
+    if(btn) btn.disabled=false;
+  }
+};
+
+window.deleteAlbum=async function(id){
+  if(currentAdmin.role==='patrol')return;
+  if(!confirm('حذف الألبوم من التطبيق؟ (الصور نفسها بتفضل مخزّنة، بس مش هتظهر تاني هنا)'))return;
+  try{
+    await deleteDoc(doc(db,'groups',currentGroupCode,'albums',id));
+    if(currentAlbumId===id) closeAlbumDetail();
+    toast('تم حذف الألبوم ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+
+window.openAlbumDetail=function(id){
+  currentAlbumId=id;
+  document.getElementById('albumDetailCard').classList.remove('hidden');
+  document.getElementById('albumUploadArea').style.display = currentAdmin.role==='patrol' ? 'none' : 'block';
+  renderAlbumDetail();
+  document.getElementById('albumDetailCard').scrollIntoView({behavior:'smooth'});
+};
+
+window.closeAlbumDetail=function(){
+  currentAlbumId=null;
+  document.getElementById('albumDetailCard').classList.add('hidden');
+};
+
+function renderAlbumDetail(){
+  const album=albums.find(a=>a.id===currentAlbumId);
+  if(!album){closeAlbumDetail();return;}
+  document.getElementById('albumDetailTitle').textContent=album.name;
+  const grid=document.getElementById('albumPhotoGrid');
+  const photos=album.photos||[];
+  const canManage=currentAdmin.role!=='patrol';
+  if(!photos.length){
+    grid.innerHTML='<div style="grid-column:1/-1;padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد صور بعد</div>';
+    return;
+  }
+  grid.innerHTML=photos.map((p,i)=>`
+    <div class="photo-thumb">
+      <img src="${p.url}" loading="lazy">
+      ${canManage?`<button class="del-photo" onclick="deleteAlbumPhoto(${i})">✕</button>`:''}
+    </div>
+  `).join('');
+}
+
+window.handleAlbumUpload=async function(input){
+  const files=[...(input.files||[])];
+  if(!files.length||!currentAlbumId||currentAdmin.role==='patrol')return;
+  const progressEl=document.getElementById('albumUploadProgress');
+  const newPhotos=[];
+  let done=0;
+  for(const file of files){
+    progressEl.textContent=`⏳ جاري رفع ${done+1} من ${files.length}...`;
+    try{
+      const url=await uploadToCloudinary(file);
+      newPhotos.push({ url });
+    }catch(e){
+      toast('تعذّر رفع صورة: '+e.message);
+    }
+    done++;
+  }
+  if(newPhotos.length){
+    const album=albums.find(a=>a.id===currentAlbumId);
+    const updatedPhotos=[...(album.photos||[]), ...newPhotos];
+    try{
+      await updateDoc(doc(db,'groups',currentGroupCode,'albums',currentAlbumId),{ photos: updatedPhotos });
+      toast(`تم رفع ${newPhotos.length} صورة ✅`);
+    }catch(e){
+      toast('حصل خطأ في الحفظ: '+e.message);
+    }
+  }
+  progressEl.textContent='';
+  input.value='';
+};
+
+window.deleteAlbumPhoto=async function(index){
+  const album=albums.find(a=>a.id===currentAlbumId);
+  if(!album||currentAdmin.role==='patrol')return;
+  if(!confirm('حذف هذه الصورة من الألبوم؟'))return;
+  const photos=[...(album.photos||[])];
+  photos.splice(index,1);
+  try{
+    await updateDoc(doc(db,'groups',currentGroupCode,'albums',currentAlbumId),{ photos });
+    toast('تم حذف الصورة ✅');
+  }catch(e){
+    toast('حصل خطأ: '+e.message);
+  }
+};
+// ===== END ALBUMS MODULE =====
+
 window.saveGroupSettings=async function(){
   if(!currentGroupCode)return;
   const name=document.getElementById('setGroupName').value.trim();
@@ -1902,6 +2121,8 @@ let pubAnns=[];
 let pubTasks=[];
 let pubLeaders=[];
 let pubAttendance=[];
+let pubAlbums=[];
+let currentPubAlbumId=null;
 
 window.switchPubTab=function(btn){
   const tab=btn.dataset.ptab;
@@ -1919,6 +2140,43 @@ function youtubeEmbedUrl(url){
   return id ? `https://www.youtube.com/embed/${id}` : null;
 }
 
+function renderPubAlbums(){
+  const el=document.getElementById('pubAlbumList');
+  if(!el)return;
+  if(!pubAlbums.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد ألبومات بعد</div>';return;}
+  el.innerHTML=pubAlbums.map(a=>{
+    const photos=a.photos||[];
+    const cover=photos.length?`<img src="${photos[0].url}" class="album-cover">`:`<div class="album-cover">🖼️</div>`;
+    return `<div class="album-card" onclick="openPubAlbumDetail('${a.id}')">
+      ${cover}
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:0.85rem;color:var(--text)">${esc(a.name)}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${photos.length} صورة</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openPubAlbumDetail=function(id){
+  currentPubAlbumId=id;
+  const album=pubAlbums.find(a=>a.id===id);
+  if(!album)return;
+  document.getElementById('pubAlbumDetailTitle').textContent=album.name;
+  const photos=album.photos||[];
+  const grid=document.getElementById('pubAlbumPhotoGrid');
+  grid.innerHTML = photos.length
+    ? photos.map(p=>`<div class="photo-thumb"><img src="${p.url}" loading="lazy"></div>`).join('')
+    : '<div style="grid-column:1/-1;padding:16px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد صور بعد</div>';
+  document.getElementById('pubAlbumListCard').classList.add('hidden');
+  document.getElementById('pubAlbumDetailCard').classList.remove('hidden');
+};
+
+window.closePubAlbumDetail=function(){
+  currentPubAlbumId=null;
+  document.getElementById('pubAlbumDetailCard').classList.add('hidden');
+  document.getElementById('pubAlbumListCard').classList.remove('hidden');
+};
+
 window.viewPublicMembers=async function(groupCode){
   try{
     const groupSnap=await getDoc(doc(db,'groups',groupCode));
@@ -1935,23 +2193,27 @@ window.viewPublicMembers=async function(groupCode){
     document.getElementById('pubGroupName').textContent=g.name;
     applyAccent(g.accentColor||PALETTE[0]);
 
-    const [membersSnap, annSnap, taskSnap, ldrSnap, attSnap]=await Promise.all([
+    const [membersSnap, annSnap, taskSnap, ldrSnap, attSnap, albumsSnap]=await Promise.all([
       getDocs(collection(db,'groups',groupCode,'members')),
       getDocs(collection(db,'groups',groupCode,'announcements')),
       getDocs(collection(db,'groups',groupCode,'tasks')),
       getDocs(collection(db,'groups',groupCode,'publicLeaders')),
-      getDocs(collection(db,'groups',groupCode,'attendance'))
+      getDocs(collection(db,'groups',groupCode,'attendance')),
+      getDocs(collection(db,'groups',groupCode,'albums'))
     ]);
     pubMembers=membersSnap.docs.map(d=>({id:d.id,...d.data()}));
     pubAnns=annSnap.docs.map(d=>({id:d.id,...d.data()}));
     pubTasks=taskSnap.docs.map(d=>({id:d.id,...d.data()}));
     pubLeaders=ldrSnap.docs.map(d=>({id:d.id,...d.data()}));
     pubAttendance=attSnap.docs.map(d=>({id:d.id,...d.data()}));
+    pubAlbums=albumsSnap.docs.map(d=>({id:d.id,...d.data()}));
 
     document.getElementById('pubMemSearch').value='';
+    closePubAlbumDetail();
     renderPublicMembers();
     renderPubAnn();
     renderPubVideo(g.featuredVideoUrl);
+    renderPubAlbums();
     renderPubTasks();
     renderPubLeaders();
     renderPubRank();
