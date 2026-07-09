@@ -56,14 +56,13 @@
   .tab-btn.sel{background:var(--accent);color:#0a1830;border-color:var(--accent)}
   .tab-panel.hidden{display:none}
 
-  .mem-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border)}
-  .mem-row:last-child{border-bottom:none}
-  .mem-avatar{width:38px;height:38px;border-radius:50%;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+  .mem-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px}
+  .mem-avatar{width:46px;height:46px;border-radius:50%;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden}
   .mem-info{flex:1;min-width:0}
-  .mem-info .name{font-size:0.85rem;font-weight:700;color:var(--text)}
-  .mem-info .meta{font-size:0.7rem;color:var(--muted)}
-  .mem-actions{display:flex;gap:4px}
-  .icon-btn{background:none;border:none;cursor:pointer;font-size:0.95rem;padding:4px}
+  .mem-info .name{font-size:0.9rem;font-weight:700;color:var(--text)}
+  .mem-info .meta{font-size:0.72rem;color:var(--muted);margin-top:2px}
+  .mem-actions{display:flex;gap:8px;flex-shrink:0}
+  .icon-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:10px;cursor:pointer;font-size:1rem;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
 
   .chat-bubble{max-width:85%;padding:9px 12px;border-radius:14px;font-size:0.82rem;line-height:1.5;word-break:break-word}
   .chat-bubble .sender{font-size:0.68rem;font-weight:700;color:var(--accent);margin-bottom:3px}
@@ -373,7 +372,8 @@
     </div>
 
     <div class="tab-bar">
-      <button class="tab-btn sel" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
+      <button class="tab-btn sel" data-tab="home" onclick="switchTab(this)">🏠 الرئيسية</button>
+      <button class="tab-btn" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
       <button class="tab-btn" data-tab="tasks" onclick="switchTab(this)">📋 المهام</button>
       <button class="tab-btn" data-tab="chat" onclick="switchTab(this)">💬 الشات</button>
       <button class="tab-btn" data-tab="ann" onclick="switchTab(this)">📢 الإعلانات</button>
@@ -383,8 +383,24 @@
       <button class="tab-btn" data-tab="settings" onclick="switchTab(this)">⚙️ الإعدادات</button>
     </div>
 
+    <!-- ===== TAB: HOME (dashboard) ===== -->
+    <div id="tab-home" class="tab-panel">
+      <div class="card">
+        <h2>📊 نظرة سريعة</h2>
+        <div id="homeStatsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      </div>
+      <div class="card">
+        <h2>📌 آخر إعلان</h2>
+        <div id="homeLatestAnn"></div>
+      </div>
+      <div class="card">
+        <h2>🌟 أفضل الأعضاء</h2>
+        <div id="homeTopMembers"></div>
+      </div>
+    </div>
+
     <!-- ===== TAB: MEMBERS ===== -->
-    <div id="tab-members" class="tab-panel">
+    <div id="tab-members" class="tab-panel hidden">
       <div class="card">
         <h2 id="memFormTitle">➕ إضافة عضو جديد</h2>
         <div class="field">
@@ -716,9 +732,11 @@
 
   <footer>
     كشافتي © 2026 — جميع الحقوق محفوظة<br>
-    تطوير وإدارة: <b>شادي محمد حجاب</b><br>
-    📱 <a href="tel:+201006857145">+20 100 685 7145</a> &nbsp;|&nbsp;
-    ✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a>
+    تطوير وإدارة: <b>شادي محمد حجاب</b>
+    <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+      <span>✉️ <a href="mailto:shadyhegab2@gmail.com">shadyhegab2@gmail.com</a></span>
+      <span dir="ltr">📱 <a href="tel:+201006857145">+20 100 685 7145</a></span>
+    </div>
   </footer>
 </div>
 
@@ -1154,15 +1172,18 @@ function renderMembersList(){
     const age=calcAge(m.birthdate);
     const ageTxt=age!==null?` · ${age} سنة`:'';
     const rankTxt=m.rank?` · ${esc(m.rank)}`:'';
-    const badgesHtml=(m.badges&&m.badges.length)?`<div class="mem-badges">${m.badges.map(bId=>{
+    const joinDate=m.createdAt?.seconds?new Date(m.createdAt.seconds*1000).toLocaleDateString('ar-EG'):null;
+    const joinTxt=joinDate?` · عضو منذ ${joinDate}`:'';
+    const badgeList=m.badges||[];
+    const badgesHtml=badgeList.length?`<div class="mem-badges">${badgeList.slice(0,4).map(bId=>{
       const b=BADGE_PRESETS.find(x=>x.id===bId);
       return b?`<span title="${esc(b.label)}">${b.emoji}</span>`:'';
-    }).join('')}</div>`:'';
+    }).join('')}${badgeList.length>4?`<span style="font-size:0.68rem;color:var(--muted);align-self:center">+${badgeList.length-4}</span>`:''}</div>`:'';
     return `<div class="mem-row">
       <div class="mem-avatar">${avatar}</div>
       <div class="mem-info">
         <div class="name">${esc(m.name)}${rankTxt}</div>
-        <div class="meta">${esc(m.phone||'بدون رقم')}${patrol}${ageTxt}</div>
+        <div class="meta">${esc(m.phone||'بدون رقم')}${patrol}${ageTxt}${joinTxt}</div>
         ${badgesHtml}
       </div>
       <div class="mem-actions">
@@ -1663,6 +1684,7 @@ function startAnnSubscription(){
   annUnsub=onSnapshot(col, snap=>{
     anns=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderAnnList();
+    renderHomeDashboard();
   });
 }
 
@@ -1894,6 +1916,60 @@ function renderStatsOverview(){
     <div class="stat-box"><div class="num">${totalTasks?`${doneTasks}/${totalTasks}`:'0'}</div><div class="lbl">✅ مهام منتهية</div></div>
     <div class="stat-box"><div class="num">${attendanceRate}%</div><div class="lbl">📊 معدل الحضور</div></div>
   `;
+  renderHomeDashboard();
+}
+
+function renderHomeDashboard(){
+  const gridEl=document.getElementById('homeStatsGrid');
+  if(gridEl){
+    const total=members.length;
+    const pendingTasks=tasks.filter(t=>t.status!=='done').length;
+    const totalAlbums=(typeof albums!=='undefined')?albums.length:0;
+    gridEl.innerHTML=`
+      <div class="stat-box"><div class="num">${total}</div><div class="lbl">👥 الأعضاء</div></div>
+      <div class="stat-box"><div class="num">${pendingTasks}</div><div class="lbl">📋 مهام مفتوحة</div></div>
+      <div class="stat-box"><div class="num">${anns.length}</div><div class="lbl">📢 الإعلانات</div></div>
+      <div class="stat-box"><div class="num">${totalAlbums}</div><div class="lbl">🖼️ الألبومات</div></div>
+    `;
+  }
+
+  const annEl=document.getElementById('homeLatestAnn');
+  if(annEl){
+    if(!anns.length){
+      annEl.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:0.8rem">لا توجد إعلانات بعد</div>';
+    }else{
+      const latest=[...anns].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))[0];
+      const date=latest.createdAt?.seconds?new Date(latest.createdAt.seconds*1000).toLocaleDateString('ar-EG'):'';
+      annEl.innerHTML=`<div style="padding:10px;background:rgba(0,0,0,0.15);border-radius:10px">
+        <div style="font-weight:700;font-size:0.85rem;color:var(--text)">${esc(latest.title)}</div>
+        ${latest.body?`<div style="font-size:0.76rem;color:var(--muted);margin-top:4px">${esc(latest.body)}</div>`:''}
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:6px">${date}</div>
+      </div>`;
+    }
+  }
+
+  const topEl=document.getElementById('homeTopMembers');
+  if(topEl){
+    if(!members.length){
+      topEl.innerHTML='<div style="padding:12px;text-align:center;color:var(--muted);font-size:0.8rem">لا يوجد أعضاء بعد</div>';
+    }else{
+      const scored=members.map(m=>{
+        const attCount=attendanceRecords.filter(r=>(r.presentIds||[]).includes(m.id)).length;
+        const badgeCount=(m.badges||[]).length;
+        return { m, total: attCount+badgeCount };
+      }).sort((a,b)=>b.total-a.total).slice(0,3);
+      const medals=['🥇','🥈','🥉'];
+      topEl.innerHTML=scored.map((s,i)=>{
+        const icon=s.m.gender==='female'?'👧':'👦';
+        const avatar=s.m.photoUrl?`<img src="${s.m.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:icon;
+        return `<div class="mem-row">
+          <div style="width:22px;text-align:center">${medals[i]||''}</div>
+          <div class="mem-avatar">${avatar}</div>
+          <div class="mem-info"><div class="name">${esc(s.m.name)}</div><div class="meta">🏅 ${(s.m.badges||[]).length} وسام</div></div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 // ===== END ATTENDANCE & STATS MODULE =====
 
@@ -2330,10 +2406,11 @@ function renderPublicMembers(){
     const avatar=m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:icon;
     const patrol=m.patrol?` · طليعة ${esc(m.patrol)}`:'';
     const rankTxt=m.rank?` · ${esc(m.rank)}`:'';
-    const badgesHtml=(m.badges&&m.badges.length)?`<div class="mem-badges">${m.badges.map(bId=>{
+    const badgeList=m.badges||[];
+    const badgesHtml=badgeList.length?`<div class="mem-badges">${badgeList.slice(0,4).map(bId=>{
       const b=BADGE_PRESETS.find(x=>x.id===bId);
       return b?`<span title="${esc(b.label)}">${b.emoji}</span>`:'';
-    }).join('')}</div>`:'';
+    }).join('')}${badgeList.length>4?`<span style="font-size:0.68rem;color:var(--muted);align-self:center">+${badgeList.length-4}</span>`:''}</div>`:'';
     return `<div class="mem-row">
       <div class="mem-avatar">${avatar}</div>
       <div class="mem-info">
