@@ -4,49 +4,49 @@
       <stop offset="0%" stop-color="#1e3a5f"/>
       <stop offset="100%" stop-color="#0f2038"/>
     </radialGradient>
-    <linearGradient id="needleBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7dd3f0"/>
-      <stop offset="100%" stop-color="#3a9bd1"/>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0e2c4"/>
+      <stop offset="100%" stop-color="#c9a876"/>
     </linearGradient>
   </defs>
 
-  <!-- background circle -->
   <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#c9a876" stroke-width="8" opacity="0.55"/>
 
-  <!-- beige ring -->
-  <circle cx="256" cy="256" r="212" fill="none" stroke="#e8dcc4" stroke-width="14"/>
-  <circle cx="256" cy="256" r="186" fill="none" stroke="#e8dcc4" stroke-width="3" opacity="0.55"/>
+  <g transform="translate(256,246)">
+    <!-- side petals -->
+    <path d="M-16,-30
+             C-70,-70 -130,-70 -168,-28
+             C-150,10 -104,30 -60,22
+             C-40,18 -24,4 -16,-14 Z" fill="url(#gold)"/>
+    <path d="M16,-30
+             C70,-70 130,-70 168,-28
+             C150,10 104,30 60,22
+             C40,18 24,4 16,-14 Z" fill="url(#gold)"/>
 
-  <!-- tick marks -->
-  <g stroke="#e8dcc4" stroke-width="4" opacity="0.85">
-    <line x1="256" y1="60"  x2="256" y2="86"/>
-    <line x1="256" y1="426" x2="256" y2="452"/>
-    <line x1="60"  y1="256" x2="86"  y2="256"/>
-    <line x1="426" y1="256" x2="452" y2="256"/>
-  </g>
-  <g stroke="#e8dcc4" stroke-width="2.5" opacity="0.5">
-    <line x1="130" y1="130" x2="148" y2="148"/>
-    <line x1="382" y1="130" x2="364" y2="148"/>
-    <line x1="130" y1="382" x2="148" y2="364"/>
-    <line x1="382" y1="382" x2="364" y2="364"/>
-  </g>
+    <!-- small stars on the side petals -->
+    <g fill="#0f2038">
+      <path d="M-118,-32 l5,11 12,1 -9,8 3,12 -11,-6 -11,6 3,-12 -9,-8 12,-1 z"/>
+      <path d="M118,-32 l5,11 12,1 -9,8 3,12 -11,-6 -11,6 3,-12 -9,-8 12,-1 z"/>
+    </g>
 
-  <!-- compass star (8-point) -->
-  <g transform="translate(256,256)">
-    <!-- main cross points: beige -->
-    <polygon points="0,-168 26,-26 0,0 -26,-26" fill="#e8dcc4"/>
-    <polygon points="0,168 26,26 0,0 -26,26" fill="#c9b998"/>
-    <polygon points="168,0 26,26 0,0 26,-26" fill="#e8dcc4"/>
-    <polygon points="-168,0 -26,26 0,0 -26,-26" fill="#c9b998"/>
+    <!-- center flame / petal -->
+    <path d="M0,-170
+             C46,-120 46,-56 24,-10
+             C40,-2 50,16 50,38
+             C50,74 28,100 0,118
+             C-28,100 -50,74 -50,38
+             C-50,16 -40,-2 -24,-10
+             C-46,-56 -46,-120 0,-170 Z" fill="url(#gold)"/>
+    <path d="M0,-150 C34,-112 34,-58 16,-18" fill="none" stroke="#0f2038" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+    <path d="M0,-150 C-34,-112 -34,-58 -16,-18" fill="none" stroke="#0f2038" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
 
-    <!-- diagonal points: sky blue (the "needle" accent) -->
-    <polygon points="0,-118 16,-16 0,0 -16,-16" fill="url(#needleBlue)" transform="rotate(45)"/>
-    <polygon points="0,118 16,16 0,0 -16,16" fill="#2f7fa8" transform="rotate(45)"/>
-    <polygon points="118,0 16,16 0,0 16,-16" fill="url(#needleBlue)" transform="rotate(45)"/>
-    <polygon points="-118,0 -16,16 0,0 -16,-16" fill="#2f7fa8" transform="rotate(45)"/>
+    <!-- ribbon band -->
+    <path d="M-150,60 Q0,118 150,60 L150,92 Q0,150 -150,92 Z" fill="#7dd3f0"/>
+    <path d="M-150,60 Q0,118 150,60" fill="none" stroke="#0f2038" stroke-width="3" opacity="0.2"/>
 
-    <!-- center medallion -->
-    <circle r="34" fill="#0f2038" stroke="#e8dcc4" stroke-width="4"/>
-    <circle r="10" fill="#7dd3f0"/>
+    <!-- knot -->
+    <circle cy="86" r="20" fill="#0f2038" stroke="url(#gold)" stroke-width="5"/>
+    <circle cy="86" r="7" fill="#7dd3f0"/>
   </g>
 </svg>

@@ -762,7 +762,8 @@ async function uploadToCloudinary(file){
 }
 
 // ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
-const PALETTE = ['#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
+const PALETTE = ['#1e3a5f','#c9a876','#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
+const TYPE_ACCENT_COLORS = { 'بحرية':'#1e3a5f', 'فتيان':'#c9a876', 'جوية':'#7dd3f0', 'مرشدات':'#e74c8c' };
 let selColor = PALETTE[0];
 let setSelColor = PALETTE[0];
 let currentGroupCode = null;
@@ -868,6 +869,12 @@ window.selType=function(el){
   el.classList.add('sel');
   const slogan=document.getElementById('typeSlogan');
   if(slogan) slogan.textContent = el.dataset.type==='مرشدات' ? '🌸 كوني مستعدة' : '⚡ كن مستعد';
+  const suggested=TYPE_ACCENT_COLORS[el.dataset.type];
+  if(suggested){
+    selColor=suggested;
+    buildSwatches('colorSwatches', null, selColor);
+    applyAccent(selColor);
+  }
 };
 
 function buildSwatches(containerId, onPick, initial){
