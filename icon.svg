@@ -1,52 +1,81 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <radialGradient id="bg" cx="35%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="#1e3a5f"/>
-      <stop offset="100%" stop-color="#0f2038"/>
-    </radialGradient>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f0e2c4"/>
-      <stop offset="100%" stop-color="#c9a876"/>
+    <linearGradient id="sea" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a5a8a"/><stop offset="100%" stop-color="#1e3a5f"/>
     </linearGradient>
+    <linearGradient id="air" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9fe0f5"/><stop offset="100%" stop-color="#7dd3f0"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3f6b3f"/><stop offset="100%" stop-color="#2c4d2c"/>
+    </linearGradient>
+    <linearGradient id="guide" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a888c9"/><stop offset="100%" stop-color="#8e6bd8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0e2c4"/><stop offset="100%" stop-color="#c9a876"/>
+    </linearGradient>
+    <radialGradient id="centerBg" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#3a2d5c"/><stop offset="100%" stop-color="#221a3a"/>
+    </radialGradient>
   </defs>
 
-  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="222" fill="none" stroke="#c9a876" stroke-width="8" opacity="0.55"/>
+  <!-- outer rounded square background -->
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="#f0e6d2"/>
 
-  <g transform="translate(256,246)">
-    <!-- side petals -->
-    <path d="M-16,-30
-             C-70,-70 -130,-70 -168,-28
-             C-150,10 -104,30 -60,22
-             C-40,18 -24,4 -16,-14 Z" fill="url(#gold)"/>
-    <path d="M16,-30
-             C70,-70 130,-70 168,-28
-             C150,10 104,30 60,22
-             C40,18 24,4 16,-14 Z" fill="url(#gold)"/>
+  <g transform="translate(256,232)">
+    <!-- four petal quadrants -->
+    <!-- top-left: land / camping -->
+    <path d="M0,0 L-190,-190 A190,190 0 0,0 -190,0 Z" fill="url(#land)"/>
+    <!-- top-right: sea -->
+    <path d="M0,0 L190,-190 A190,190 0 0,1 190,0 Z" fill="url(#sea)"/>
+    <!-- bottom-left: fetyan/scouts silhouette -->
+    <path d="M0,0 L-190,0 A190,190 0 0,0 -190,190 Z" fill="#b9a23e"/>
+    <!-- bottom-right: guides -->
+    <path d="M0,0 L190,0 A190,190 0 0,1 190,190 Z" fill="url(#guide)"/>
+    <!-- air (bottom center small wedge merges visually via icon only, keep four-quadrant clean) -->
 
-    <!-- small stars on the side petals -->
-    <g fill="#0f2038">
-      <path d="M-118,-32 l5,11 12,1 -9,8 3,12 -11,-6 -11,6 3,-12 -9,-8 12,-1 z"/>
-      <path d="M118,-32 l5,11 12,1 -9,8 3,12 -11,-6 -11,6 3,-12 -9,-8 12,-1 z"/>
+    <!-- simple icons per quadrant -->
+    <!-- tent (land) -->
+    <g transform="translate(-95,-95)">
+      <path d="M-28,20 L0,-28 L28,20 Z" fill="#f0e6d2"/>
+      <path d="M0,-28 L0,20" stroke="#2c4d2c" stroke-width="3"/>
+    </g>
+    <!-- sailboat (sea) -->
+    <g transform="translate(95,-95)">
+      <path d="M-24,18 h48 l-8,10 h-32 z" fill="#f0e6d2"/>
+      <path d="M0,18 V-26 L22,14 Z" fill="#f0e6d2"/>
+      <path d="M0,-26 V18" stroke="#1e3a5f" stroke-width="2"/>
+    </g>
+    <!-- scout figure (fetyan) -->
+    <g transform="translate(-95,95)">
+      <circle cy="-10" r="12" fill="#f0e6d2"/>
+      <path d="M-16,28 C-16,6 16,6 16,28 Z" fill="#f0e6d2"/>
+    </g>
+    <!-- guide figure -->
+    <g transform="translate(95,95)">
+      <circle cy="-10" r="12" fill="#f0e6d2"/>
+      <path d="M-16,28 C-16,6 16,6 16,28 Z" fill="#f0e6d2"/>
+      <path d="M10,-16 q10,4 6,16" fill="none" stroke="#f0e6d2" stroke-width="4" stroke-linecap="round"/>
     </g>
 
-    <!-- center flame / petal -->
-    <path d="M0,-170
-             C46,-120 46,-56 24,-10
-             C40,-2 50,16 50,38
-             C50,74 28,100 0,118
-             C-28,100 -50,74 -50,38
-             C-50,16 -40,-2 -24,-10
-             C-46,-56 -46,-120 0,-170 Z" fill="url(#gold)"/>
-    <path d="M0,-150 C34,-112 34,-58 16,-18" fill="none" stroke="#0f2038" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
-    <path d="M0,-150 C-34,-112 -34,-58 -16,-18" fill="none" stroke="#0f2038" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
+    <!-- center circle with fleur-de-lis -->
+    <circle r="98" fill="url(#centerBg)" stroke="url(#gold)" stroke-width="7"/>
+    <g transform="translate(0,4) scale(0.62)">
+      <path d="M-16,-30 C-70,-70 -130,-70 -168,-28 C-150,10 -104,30 -60,22 C-40,18 -24,4 -16,-14 Z" fill="url(#gold)"/>
+      <path d="M16,-30 C70,-70 130,-70 168,-28 C150,10 104,30 60,22 C40,18 24,4 16,-14 Z" fill="url(#gold)"/>
+      <path d="M0,-170 C46,-120 46,-56 24,-10 C40,-2 50,16 50,38 C50,74 28,100 0,118 C-28,100 -50,74 -50,38 C-50,16 -40,-2 -24,-10 C-46,-56 -46,-120 0,-170 Z" fill="url(#gold)"/>
+    </g>
 
-    <!-- ribbon band -->
-    <path d="M-150,60 Q0,118 150,60 L150,92 Q0,150 -150,92 Z" fill="#7dd3f0"/>
-    <path d="M-150,60 Q0,118 150,60" fill="none" stroke="#0f2038" stroke-width="3" opacity="0.2"/>
-
-    <!-- knot -->
-    <circle cy="86" r="20" fill="#0f2038" stroke="url(#gold)" stroke-width="5"/>
-    <circle cy="86" r="7" fill="#7dd3f0"/>
+    <!-- gold diamond accents at petal seams -->
+    <g fill="url(#gold)">
+      <path d="M0,-118 l10,14 -10,14 -10,-14 z"/>
+      <path d="M0,118 l10,14 -10,14 -10,-14 z" transform="translate(0,0)"/>
+      <path d="M-118,0 l14,10 -14,10 -14,-10 z"/>
+      <path d="M118,0 l14,10 -14,10 -14,-10 z"/>
+    </g>
   </g>
+
+  <!-- bottom accent arc (no text — OS displays app name automatically; text in small icons is unreadable and risks rendering issues) -->
+  <path d="M0,392 Q256,352 512,392 L512,512 L0,512 Z" fill="#f0e6d2"/>
 </svg>

@@ -891,7 +891,7 @@ window.selType=function(el){
   if(suggested){
     selColor=suggested;
     buildSwatches('colorSwatches', null, selColor);
-    applyAccent(selColor);
+    applyAccent(selColor, secondaryForType(el.dataset.type));
   }
 };
 
@@ -906,8 +906,12 @@ window.pickSwatch=function(containerId,color){
 }
 buildSwatches('colorSwatches', null, selColor);
 
-function applyAccent(color){
+function applyAccent(color, secondary){
   document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--sky', secondary || '#7dd3f0');
+}
+function secondaryForType(type){
+  return { 'بحرية':'#7dd3f0', 'فتيان':'#6fae6f', 'جوية':'#1e3a5f', 'مرشدات':'#8e6bd8' }[type] || '#7dd3f0';
 }
 
 function slugify(name){
@@ -1026,7 +1030,7 @@ function enterApp(groupData){
   document.getElementById('setVideoUrl').value=groupData.featuredVideoUrl||'';
   document.getElementById('settingsGroupCode').textContent=currentGroupCode;
   setSelColor=groupData.accentColor||PALETTE[0];
-  applyAccent(setSelColor);
+  applyAccent(setSelColor, secondaryForType(groupData.type));
   buildSwatches('setColorSwatches', null, setSelColor);
   pendingLogoDataUrl=null;
   const heroImg=document.getElementById('ghLogoImg');
@@ -2274,7 +2278,7 @@ window.viewPublicMembers=async function(groupCode){
     if(g.logoUrl){heroImg.src=g.logoUrl;heroImg.style.display='block';heroFallback.style.display='none';}
     else{heroImg.style.display='none';heroFallback.style.display='flex';}
     document.getElementById('pubGroupName').textContent=g.name;
-    applyAccent(g.accentColor||PALETTE[0]);
+    applyAccent(g.accentColor||PALETTE[0], secondaryForType(g.type));
 
     const [membersSnap, annSnap, taskSnap, ldrSnap, attSnap, albumsSnap]=await Promise.all([
       getDocs(collection(db,'groups',groupCode,'members')),
