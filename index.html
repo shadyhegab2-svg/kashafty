@@ -301,6 +301,35 @@
         <input id="regOwnerName" placeholder="الاسم بالكامل">
       </div>
       <div class="field">
+        <label>الدولة</label>
+        <select id="regCountry" onchange="onCountryChange()" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem">
+          <option value="مصر">🇪🇬 مصر</option>
+          <option value="السعودية">🇸🇦 السعودية</option>
+          <option value="الإمارات">🇦🇪 الإمارات</option>
+          <option value="الكويت">🇰🇼 الكويت</option>
+          <option value="قطر">🇶🇦 قطر</option>
+          <option value="البحرين">🇧🇭 البحرين</option>
+          <option value="عمان">🇴🇲 عمان</option>
+          <option value="الأردن">🇯🇴 الأردن</option>
+          <option value="لبنان">🇱🇧 لبنان</option>
+          <option value="العراق">🇮🇶 العراق</option>
+          <option value="سوريا">🇸🇾 سوريا</option>
+          <option value="فلسطين">🇵🇸 فلسطين</option>
+          <option value="ليبيا">🇱🇾 ليبيا</option>
+          <option value="تونس">🇹🇳 تونس</option>
+          <option value="الجزائر">🇩🇿 الجزائر</option>
+          <option value="المغرب">🇲🇦 المغرب</option>
+          <option value="السودان">🇸🇩 السودان</option>
+          <option value="اليمن">🇾🇪 اليمن</option>
+          <option value="أخرى">🌍 دولة أخرى</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>المحافظة / المنطقة</label>
+        <select id="regGovernorateSelect" style="width:100%;padding:11px 12px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:Cairo,sans-serif;font-size:0.85rem"></select>
+        <input id="regGovernorateText" placeholder="اكتب اسم المحافظة/المنطقة" style="display:none;margin-top:8px">
+      </div>
+      <div class="field">
         <label>رقم الموبايل (واتساب)</label>
         <input id="regOwnerPhone" placeholder="01xxxxxxxxx" dir="ltr">
       </div>
@@ -316,6 +345,20 @@
       <button class="btn btn-primary" onclick="registerGroup()" id="regSaveBtn">✅ إنشاء المجموعة</button>
       <button class="btn-link" style="display:block;text-align:center;margin-top:12px" onclick="showScreen('home')">رجوع</button>
       <div id="regMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== OVERLAY: GROUP CREATED SUCCESS ===================== -->
+  <div id="regSuccessOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(10,20,40,0.92);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div class="card" style="max-width:420px;width:100%;text-align:center;border:2px solid var(--accent)">
+      <div style="font-size:2.2rem;margin-bottom:6px">🎉</div>
+      <h2 style="margin-bottom:6px">تم إنشاء مجموعتك بنجاح!</h2>
+      <p style="color:var(--muted);font-size:0.8rem;margin-bottom:14px">كود مجموعتك — احتفظ به، هتحتاجه لو حبيت تفتح التطبيق العام لاحقًا</p>
+      <div style="background:rgba(0,0,0,0.3);border:2px solid var(--accent);border-radius:14px;padding:22px;margin-bottom:16px">
+        <div style="font-weight:800;letter-spacing:2px;direction:ltr;font-size:1.8rem;color:var(--sky);word-break:break-all" id="regSuccessCode"></div>
+      </div>
+      <button class="btn btn-outline" onclick="copyRegSuccessCode()" style="margin-bottom:10px">📋 نسخ الكود</button>
+      <button class="btn btn-primary" onclick="dismissRegSuccess()">✅ متابعة إلى لوحة التحكم</button>
     </div>
   </div>
 
@@ -700,10 +743,10 @@
         الكود ده مش للدخول الإداري (القادة والعرفاء بيدخلوا بالإيميل وكلمة المرور بس).
         استخدامه الوحيد: مشاركته مع أي حد عايز يفتح "التطبيق العام" لمجموعتك (لو فعّلته من تحت) من غير تسجيل دخول.
       </p>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="flex:1;background:rgba(0,0,0,0.25);border:1px solid var(--border2);border-radius:10px;padding:11px;font-weight:800;letter-spacing:1px;direction:ltr;text-align:center;color:var(--sky)" id="settingsGroupCode"></div>
-        <button class="btn-link" onclick="copyGroupCode()">📋 نسخ</button>
+      <div style="background:rgba(0,0,0,0.25);border:2px solid var(--accent);border-radius:14px;padding:20px;text-align:center;margin-bottom:10px">
+        <div style="font-weight:800;letter-spacing:2px;direction:ltr;font-size:1.6rem;color:var(--sky);word-break:break-all" id="settingsGroupCode"></div>
       </div>
+      <button class="btn btn-outline" onclick="copyGroupCode()" style="margin-top:0">📋 نسخ الكود</button>
     </div>
 
     <div class="card">
@@ -863,6 +906,19 @@ window.copyGroupCode=function(){
   navigator.clipboard.writeText(currentGroupCode).then(()=>toast('تم نسخ الكود ✅')).catch(()=>{});
 };
 
+window.copyRegSuccessCode=function(){
+  if(!currentGroupCode)return;
+  navigator.clipboard.writeText(currentGroupCode).then(()=>toast('تم نسخ الكود ✅')).catch(()=>{});
+};
+
+window.dismissRegSuccess=function(){
+  document.getElementById('regSuccessOverlay').classList.add('hidden');
+  if(pendingEnterAppData){
+    enterApp(pendingEnterAppData);
+    pendingEnterAppData=null;
+  }
+};
+
 window.changeMyPassword=async function(){
   if(!currentGroupCode||!currentAdmin)return;
   const p1=document.getElementById('newPass1').value;
@@ -924,6 +980,7 @@ function slugify(name){
 
 // ===== REGISTER =====
 let registeringInProgress=false;
+let pendingEnterAppData=null;
 window.registerGroup=async function(){
   if(registeringInProgress)return;
   const name=document.getElementById('regGroupName').value.trim();
@@ -955,10 +1012,11 @@ window.registerGroup=async function(){
       name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super', createdAt: serverTimestamp()
     });
     await setDoc(doc(db,'adminIndex',uid),{ groupId: groupCode, role:'super' });
-    toast(`تم إنشاء المجموعة ✅ — كود مجموعتك (للتطبيق العام لاحقًا): ${groupCode}`);
+    pendingEnterAppData=groupData;
+    document.getElementById('regSuccessCode').textContent=groupCode;
+    document.getElementById('regSuccessOverlay').classList.remove('hidden');
     currentGroupCode=groupCode;
     currentAdmin={ id:uid, name: ownerName, email: ownerEmail, phone: ownerPhone, role:'super' };
-    enterApp(groupData);
   }catch(e){
     const msg = e.code==='auth/email-already-in-use' ? 'البريد الإلكتروني ده مسجّل بحساب تاني بالفعل ⚠️'
       : e.code==='auth/weak-password' ? 'كلمة المرور ضعيفة، اختار كلمة أقوى (6 حروف على الأقل) ⚠️'
