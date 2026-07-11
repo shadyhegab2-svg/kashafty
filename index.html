@@ -825,6 +825,27 @@ async function uploadToCloudinary(file){
 // ألوان مميزة مقترحة لكل مجموعة (فوق قاعدة كحلي/بيج/لبني الثابتة)
 const PALETTE = ['#1e3a5f','#c9a876','#7dd3f0','#e74c8c','#8e6bd8','#e67e22','#2ecc71','#e74c3c','#1abc9c','#f1c40f'];
 const TYPE_ACCENT_COLORS = { 'بحرية':'#1e3a5f', 'فتيان':'#c9a876', 'جوية':'#7dd3f0', 'مرشدات':'#e74c8c' };
+
+const EGYPT_GOVERNORATES = [
+  'القاهرة','الجيزة','الإسكندرية','الدقهلية','البحر الأحمر','البحيرة','الفيوم','الغربية',
+  'الإسماعيلية','المنوفية','المنيا','القليوبية','الوادي الجديد','السويس','أسوان','أسيوط',
+  'بني سويف','بورسعيد','دمياط','الشرقية','جنوب سيناء','كفر الشيخ','مطروح','الأقصر',
+  'قنا','شمال سيناء','سوهاج'
+];
+
+window.onCountryChange=function(){
+  const country=document.getElementById('regCountry').value;
+  const govSelect=document.getElementById('regGovernorateSelect');
+  const govText=document.getElementById('regGovernorateText');
+  if(country==='مصر'){
+    govSelect.innerHTML=EGYPT_GOVERNORATES.map(g=>`<option value="${g}">${g}</option>`).join('');
+    govSelect.style.display='block';
+    govText.style.display='none';
+  }else{
+    govSelect.style.display='none';
+    govText.style.display='block';
+  }
+};
 let selColor = PALETTE[0];
 let setSelColor = PALETTE[0];
 let currentGroupCode = null;
@@ -961,6 +982,7 @@ window.pickSwatch=function(containerId,color){
   if(containerId==='setColorSwatches'){ setSelColor=color; applyAccent(color); }
 }
 buildSwatches('colorSwatches', null, selColor);
+onCountryChange();
 
 function applyAccent(color, secondary){
   document.documentElement.style.setProperty('--accent', color);
@@ -985,6 +1007,10 @@ window.registerGroup=async function(){
   if(registeringInProgress)return;
   const name=document.getElementById('regGroupName').value.trim();
   const type=document.querySelector('#typeGrid .type-opt.sel')?.dataset.type||'فتيان';
+  const country=document.getElementById('regCountry').value;
+  const govSelect=document.getElementById('regGovernorateSelect');
+  const govText=document.getElementById('regGovernorateText');
+  const governorate=(govText.style.display!=='none'?govText.value:govSelect.value).trim();
   const ownerName=document.getElementById('regOwnerName').value.trim();
   const ownerPhone=document.getElementById('regOwnerPhone').value.trim();
   const ownerEmail=document.getElementById('regOwnerEmail').value.trim();
@@ -992,7 +1018,7 @@ window.registerGroup=async function(){
   const msgEl=document.getElementById('regMsg');
   msgEl.className='msg';msgEl.textContent='';
 
-  if(!name||!ownerName||!ownerPhone||!ownerEmail||!password){
+  if(!name||!ownerName||!ownerPhone||!ownerEmail||!password||!governorate){
     msgEl.className='msg err';msgEl.textContent='من فضلك املأ كل الحقول المطلوبة (البريد الإلكتروني إلزامي دلوقتي) ⚠️';return;
   }
   const groupCode = slugify(name)+'-'+Math.floor(1000+Math.random()*9000);
@@ -1004,7 +1030,7 @@ window.registerGroup=async function(){
     const cred=await createUserWithEmailAndPassword(auth, ownerEmail, password);
     const uid=cred.user.uid;
     const groupData={
-      name, type, ownerName, ownerPhone, ownerEmail,
+      name, type, country, governorate, ownerName, ownerPhone, ownerEmail,
       accentColor: selColor, logoUrl:'', publicMembersEnabled:false, featuredVideoUrl:'', createdAt: serverTimestamp()
     };
     await setDoc(doc(db,'groups',groupCode), groupData);
