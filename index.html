@@ -24,6 +24,8 @@
     --card:rgba(255,255,255,0.04);
     --ok:#4caf50;
     --err:#e74c3c;
+    --shadow:0 2px 12px rgba(0,0,0,0.28);
+    --shadow2:0 6px 22px rgba(0,0,0,0.4);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -56,7 +58,7 @@
   .tab-btn.sel{background:var(--accent);color:#0a1830;border-color:var(--accent)}
   .tab-panel.hidden{display:none}
 
-  .mem-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px}
+  .mem-row{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
   .mem-avatar{width:46px;height:46px;border-radius:50%;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;overflow:hidden}
   .mem-info{flex:1;min-width:0}
   .mem-info .name{font-size:0.9rem;font-weight:700;color:var(--text)}
@@ -72,7 +74,7 @@
   .chat-bubble.mine .time{color:#0a1830;opacity:.6}
   .chat-bubble.other{align-self:flex-start;background:rgba(255,255,255,0.08)}
 
-  .stat-box{background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+  .stat-box{background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--shadow)}
   .stat-box .num{font-size:1.4rem;font-weight:800;color:var(--accent)}
   .stat-box .lbl{font-size:0.7rem;color:var(--muted);margin-top:2px}
 
@@ -81,7 +83,8 @@
   .mem-badges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
   .mem-badges span{font-size:0.85rem}
 
-  .album-card{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer}
+  .album-card{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,0.18);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;box-shadow:var(--shadow);transition:box-shadow .2s}
+  .album-card:hover{box-shadow:var(--shadow2)}
   .album-cover{width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--navy2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
   .photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--navy2)}
   .photo-thumb img{width:100%;height:100%;object-fit:cover}
@@ -94,6 +97,7 @@
     padding:20px;
     margin-bottom:16px;
     backdrop-filter:blur(6px);
+    box-shadow:var(--shadow);
   }
   .card h2{font-size:1.05rem;font-weight:700;margin-bottom:14px;color:var(--beige)}
 
@@ -109,9 +113,11 @@
   .btn{
     display:block;width:100%;padding:13px;border:none;border-radius:12px;
     font-family:Cairo,sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;
-    text-align:center;
+    text-align:center;transition:transform .2s,box-shadow .2s;
   }
-  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--sky));color:#0a1830}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--sky));color:#0a1830;box-shadow:var(--shadow)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+  .btn-primary:active{transform:translateY(0)}
   .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);margin-top:8px}
   .btn-link{background:none;border:none;color:var(--sky);font-family:Cairo,sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:underline}
 
@@ -218,12 +224,12 @@
 
     <div class="tab-bar" id="pubTabBar">
       <button class="tab-btn sel" data-ptab="ann" onclick="switchPubTab(this)">📢 إعلانات</button>
-      <button class="tab-btn" data-ptab="video" onclick="switchPubTab(this)">📺 فيديو</button>
-      <button class="tab-btn" data-ptab="albums" onclick="switchPubTab(this)">🖼️ ألبومات</button>
-      <button class="tab-btn" data-ptab="tasks" onclick="switchPubTab(this)">📋 مهام</button>
       <button class="tab-btn" data-ptab="leaders" onclick="switchPubTab(this)">🧑‍✈️ قادة</button>
       <button class="tab-btn" data-ptab="members" onclick="switchPubTab(this)">👥 أعضاء</button>
+      <button class="tab-btn" data-ptab="albums" onclick="switchPubTab(this)">🖼️ ألبومات</button>
       <button class="tab-btn" data-ptab="rank" onclick="switchPubTab(this)">🏆 ترتيب</button>
+      <button class="tab-btn" data-ptab="tasks" onclick="switchPubTab(this)">📋 مهام</button>
+      <button class="tab-btn" data-ptab="video" onclick="switchPubTab(this)">📺 فيديو</button>
     </div>
 
     <div id="ptab-ann" class="tab-panel">
@@ -416,13 +422,13 @@
 
     <div class="tab-bar">
       <button class="tab-btn sel" data-tab="home" onclick="switchTab(this)">🏠 الرئيسية</button>
-      <button class="tab-btn" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
-      <button class="tab-btn" data-tab="tasks" onclick="switchTab(this)">📋 المهام</button>
-      <button class="tab-btn" data-tab="chat" onclick="switchTab(this)">💬 الشات</button>
       <button class="tab-btn" data-tab="ann" onclick="switchTab(this)">📢 الإعلانات</button>
-      <button class="tab-btn" data-tab="stats" onclick="switchTab(this)">📊 الحضور</button>
-      <button class="tab-btn" data-tab="albums" onclick="switchTab(this)">🖼️ الألبومات</button>
       <button class="tab-btn" data-tab="leaders" onclick="switchTab(this)" id="leadersTabBtn" style="display:none">🧑‍✈️ القادة</button>
+      <button class="tab-btn" data-tab="members" onclick="switchTab(this)">👥 الأعضاء</button>
+      <button class="tab-btn" data-tab="chat" onclick="switchTab(this)">💬 الشات</button>
+      <button class="tab-btn" data-tab="albums" onclick="switchTab(this)">🖼️ الألبومات</button>
+      <button class="tab-btn" data-tab="tasks" onclick="switchTab(this)">📋 المهام</button>
+      <button class="tab-btn" data-tab="stats" onclick="switchTab(this)">📊 الحضور</button>
       <button class="tab-btn" data-tab="settings" onclick="switchTab(this)">⚙️ الإعدادات</button>
     </div>
 
